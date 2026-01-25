@@ -3,7 +3,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from backend.core.settings.db_settings import DbSettings, SQLAlchemy
 from backend.core.settings.log_settings import LoggingSettings
 from backend.core.settings.token_settings import TokenSettings
-from functools import lru_cache
 
 
 class AppSettings(BaseSettings):
@@ -21,6 +20,5 @@ class AppSettings(BaseSettings):
     )
 
 
-@lru_cache
 def get_settings() -> AppSettings:
     return AppSettings()
