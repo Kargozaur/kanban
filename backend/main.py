@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from contextlib import asynccontextmanager
 from backend.core.settings.settings import get_settings
-from database import engine, init_db
+from backend.database import engine, init_db
 
 
 def create_app() -> FastAPI:

@@ -2,7 +2,7 @@ from pydantic import Field, PostgresDsn, BaseModel
 from typing import Annotated
 
 Port = Annotated[int, Field(..., ge=1, le=65535)]
-Driver = Annotated[str, Field(..., default="asyncpg")]
+Driver = Annotated[str, Field(default="asyncpg")]
 
 
 class DbSettings(BaseModel):
