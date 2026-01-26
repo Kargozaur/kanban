@@ -21,6 +21,7 @@ def create_engine(settings: AppSettings) -> AsyncEngine:
 def init_db(
     settings: AppSettings,
 ) -> tuple[AsyncEngine, async_sessionmaker]:
+    """Database engine and session provider"""
     engine = create_engine(settings)
     async_session = async_sessionmaker(
         bind=engine,
