@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 from pydantic import ValidationError
 from backend.core.settings.settings import get_settings
 from backend.core.settings.log_settings import configure_logging
-from backend.database import engine, init_db
+from backend.database.db_config import init_db
+from backend.database.database_provider import DatabaseProvider
 from backend.core.security.password_hasher import get_hasher
 from backend.core.security.token_svc import get_token_svc
 from backend.core.exceptions.exceptions import (
@@ -89,10 +90,11 @@ async def lifespan(app: FastAPI):
     pass_hasher = get_hasher()
     token_svc = get_token_svc(settings)
     configure_logging(level=settings.logging.level)
-    init_db(settings)
+    engine, async_session_maker = init_db(settings)
+    app.state.db = DatabaseProvider(async_session_maker)
     app.state.settings = settings
     app.state.hasher = pass_hasher
     app.state.token = token_svc
     yield
-    if engine:
-        await engine.dispose()
+
+    await engine.dispose()

@@ -22,5 +22,5 @@ class TokenSvc:
         return encoded
 
 
-def get_token_svc(settings):
+def get_token_svc(settings) -> TokenSvc:
     return TokenSvc(settings)

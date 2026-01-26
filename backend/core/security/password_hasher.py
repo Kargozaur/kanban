@@ -18,5 +18,5 @@ class PasswordHasher:
         return pwd_context.verify(password, db_password)
 
 
-def get_hasher():
-    return PasswordHasher
+def get_hasher() -> PasswordHasher:
+    return PasswordHasher()
