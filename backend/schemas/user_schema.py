@@ -17,7 +17,7 @@ class UserCredentials(BaseModel):
     password: PasswordField
     name: Optional[str] = None
 
-    """validator in case if user """
+    """validator in case if user didn't set their name"""
 
     @model_validator(mode="after")
     def set_name_from_email(self):
