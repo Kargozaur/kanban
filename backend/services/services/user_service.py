@@ -2,7 +2,7 @@ from backend.schemas.user_schema import UserCredentials, UserGet
 from backend.core.security.password_hasher import PasswordHasher
 from backend.core.security.token_svc import TokenSvc
 from backend.services.repositories.user_repo import UserRepository
-from backend.core.exceptions.base_exception import (
+from backend.core.exceptions.exceptions import (
     InvalidCredentialsError,
     NotFoundError,
     AppBaseException,
@@ -10,6 +10,13 @@ from backend.core.exceptions.base_exception import (
 
 
 class UserService:
+    """
+    User service \n
+    methods: \n
+    create_user(user_credential) \n
+    login_user(user_credential) \n
+    """
+
     def __init__(
         self,
         user_repo: UserRepository,
