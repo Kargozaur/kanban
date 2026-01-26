@@ -39,6 +39,7 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(AppBaseException)
     async def base_exception(request: Request, exc: AppBaseException):
+        logging.exception("Application base exception")
         return ORJSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     async def invalid_credentials_error(
         request: Request, exc: InvalidCredentialsError
     ):
+        logging.exception("Invalid credentials exception")
         return ORJSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
@@ -59,6 +61,7 @@ def create_app() -> FastAPI:
     async def not_found_exception(
         request: Request, exc: NotFoundError
     ):
+        logging.exception("Not found exception")
         return ORJSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
@@ -70,7 +73,7 @@ def create_app() -> FastAPI:
         traceback_str = "".join(
             traceback.format_exc(type(exc), exc, exc.__traceback__)
         )
-        logging.exception(msg="Base Exception Occured")
+        logging.exception(msg="Python base exception")
         return ORJSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": traceback_str},
