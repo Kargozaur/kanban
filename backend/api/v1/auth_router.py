@@ -15,7 +15,7 @@ user_auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @user_auth_router.post("/sign_up", response_model=UserGet)
-async def sign_in(
+async def sign_up(
     user_credentials: UserCredentials, user_svc: UserSvcDep
 ):
     return await user_svc.create_user(user_credentials)
