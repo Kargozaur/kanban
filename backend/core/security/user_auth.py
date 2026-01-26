@@ -5,7 +5,6 @@ from backend.schemas.token_schema import Token
 from backend.core.settings.settings import AppSettings
 from backend.models.models import User
 from backend.core.exceptions.exceptions import InvalidCredentialsError
-from uuid import UUID
 
 
 class AuthService:
