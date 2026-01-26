@@ -13,3 +13,9 @@ class InvalidCredentialsError(AppBaseException):
     status_code = 401
     detail = "Could not validate credentials"
     headers = {"WWW-Authenticate": "Bearer"}
+
+
+class TokenError(AppBaseException):
+    status_code = 401
+    detail = "Could not validate your token"
+    headers = {"WWW-Authenticate": "Bearer"}

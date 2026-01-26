@@ -13,6 +13,7 @@ from backend.core.exceptions.exceptions import (
     AppBaseException,
     InvalidCredentialsError,
     NotFoundError,
+    TokenError,
 )
 import logging
 
@@ -69,6 +70,14 @@ def create_app() -> FastAPI:
             status_code=exc.status_code,
             content={"detail": exc.detail},
             headers=getattr(exc, "headers", None),
+        )
+
+    @app.exception_handler(TokenError)
+    async def token_exception(request: Request, exc: TokenError):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=exc.headers,
         )
 
     @app.exception_handler(Exception)
