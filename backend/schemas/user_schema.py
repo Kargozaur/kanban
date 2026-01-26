@@ -1,17 +1,33 @@
-from pydantic import BaseModel, BeforeValidator, EmailStr, ConfigDict
-from typing import Annotated
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    EmailStr,
+    ConfigDict,
+    model_validator,
+)
+from typing import Annotated, Optional
 from backend.core.utility.password_verifier import verify_password
-from backend.core.utility.validate_name import set_name
 from uuid import UUID
 
 PasswordField = Annotated[str, BeforeValidator(verify_password)]
-NameField = Annotated[str, BeforeValidator(set_name)]
 
 
 class UserCredentials(BaseModel):
     email: EmailStr
     password: PasswordField
-    name: NameField = None
+    name: Optional[str] = None
+
+    """validator in case if user """
+
+    @model_validator(mode="after")
+    def set_name_from_email(self):
+        if not self.name or not self.name.strip():
+            self.name = (
+                self.email.split("@")[0]
+                .replace("_", 0)
+                .replace(".", " ")
+            )
+        return self
 
 
 class UserLogin(BaseModel):

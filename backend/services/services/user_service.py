@@ -44,6 +44,7 @@ class UserService:
         logging.info(
             f"DEBUG - Creating user with the email: {updated_model.email}"
         )
+        logging.info(f"DEBUG - user name is: {updated_model.name}")
         result = await self.user_repo.create_user(updated_model)
         logger.info(f"DEBUG - result= {result}")
         if result["result"] is False:
