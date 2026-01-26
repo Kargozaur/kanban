@@ -8,6 +8,7 @@ from backend.database.db_config import init_db
 from backend.database.database_provider import DatabaseProvider
 from backend.core.security.password_hasher import get_hasher
 from backend.core.security.token_svc import get_token_svc
+from backend.api.routers import api_router
 from backend.core.exceptions.exceptions import (
     AppBaseException,
     InvalidCredentialsError,
@@ -20,9 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
+    """FastAPI app factory"""
     app = FastAPI(
         lifespan=lifespan, default_response_class=ORJSONResponse
     )
+    app.include_router(api_router)
 
     @app.exception_handler(ValidationError)
     async def validation_error(
