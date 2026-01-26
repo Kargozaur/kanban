@@ -3,6 +3,9 @@ from sqlalchemy.orm import load_only
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.schemas.user_schema import UserCredentials
 from backend.models.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class UserRepository:
@@ -17,13 +20,13 @@ class UserRepository:
         True if exists, False if not
         """
         result = await self.session.execute(
-            self._get_user_helper(email)
+            self._get_user_by_email_helper(email)
         )
         return result.scalar() is not None
 
-    async def get_user_by_email(self, email: str):
+    async def get_user_by_email(self, email: str) -> User | None:
         """
-        Get's user. If user doesn't exists
+        Get's user. If user exists, returns User object, if not returns None
         """
         query = self._get_user_by_email_helper(email)
         query = query.options(
@@ -31,32 +34,39 @@ class UserRepository:
         )
         result = await self.session.execute(query)
         row = result.scalar_one_or_none()
-        if row is None:
-            return {"message": "user with this email doesn't exists"}
         return row
 
     async def create_user(self, user_data: UserCredentials) -> dict:
         """
         Creates user if check_user is False
         """
+
+        check_user: bool = await self._check_if_email_exists(
+            user_data.email
+        )
+        logger.info(f"DEBUG - check_user = {check_user}")
+        if check_user is True:
+            return {
+                "result": False,
+                "reason": "email already exists",
+            }
+        logging.info(f"Email received in the repo: {user_data.email}")
+        from_orm_user = User(
+            email=user_data.email,
+            name=user_data.name,
+            password=user_data.password,
+        )
         try:
-            check_user: (
-                User | None
-            ) = await self._check_if_email_exists(user_data.email)
-            if check_user is True:
-                raise
-            from_orm_user = User(
-                email=user_data.email,
-                name=user_data.name,
-                password=user_data.password,
-            )
             self.session.add(from_orm_user)
-            await self.session.flush(from_orm_user)
+            await self.session.flush()
             await self.session.commit()
-            return {"result": "succesfully added user"}
-        except Exception:
-            self.session.rollback()
-            return {"result": "an error occured"}
+            return {"result": True}
+        except Exception as exc:
+            await self.session.rollback()
+            logging.exception(
+                f"Exception occured for the {user_data.email}"
+            )
+            return {"result": False, "reason": str(exc)}
 
     async def get_user_data(self, email: str):
         query = self._get_user_by_email_helper(email)

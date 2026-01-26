@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, status
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from pydantic import ValidationError
 from backend.core.settings.settings import get_settings
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """FastAPI app factory"""
     app = FastAPI(
-        lifespan=lifespan, default_response_class=ORJSONResponse
+        lifespan=lifespan, default_response_class=JSONResponse
     )
     app.include_router(api_router)
 
@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
     async def validation_error(
         request: Request, exc: ValidationError
     ):
-        return ORJSONResponse(
+        return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
                 "detail": "Pydantic validation error",
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
     @app.exception_handler(AppBaseException)
     async def base_exception(request: Request, exc: AppBaseException):
         logging.exception("Application base exception")
-        return ORJSONResponse(
+        return JSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
             headers=getattr(exc, "headers", None),
@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
         request: Request, exc: InvalidCredentialsError
     ):
         logging.exception("Invalid credentials exception")
-        return ORJSONResponse(
+        return JSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
             headers=exc.headers,
@@ -66,7 +66,7 @@ def create_app() -> FastAPI:
         request: Request, exc: NotFoundError
     ):
         logging.exception("Not found exception")
-        return ORJSONResponse(
+        return JSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
             headers=getattr(exc, "headers", None),
@@ -74,11 +74,9 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(Exception)
     async def other_exceptions(request: Request, exc: Exception):
-        traceback_str = "".join(
-            traceback.format_exc(type(exc), exc, exc.__traceback__)
-        )
+        traceback_str = "".join(traceback.format_exc())
         logging.exception(msg="Python base exception")
-        return ORJSONResponse(
+        return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": traceback_str},
             headers=getattr(exc, "headers", None),

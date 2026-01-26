@@ -7,7 +7,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.types import String, UUID
 from backend.models.camel_to_snake import camel_to_snake
 from backend.models.mixins import CreatedAt, UpdatedAt
-from uuid import UUID as uuid
+from uuid import uuid4, UUID as uuid
 
 
 class Base(DeclarativeBase):
@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 
 class User(CreatedAt, UpdatedAt, Base):
     id: Mapped[uuid] = mapped_column(
-        UUID(as_uuid=True), primary_key=True
+        UUID(as_uuid=True), primary_key=True, default=uuid4
     )
     email: Mapped[str] = mapped_column(
         String(254), unique=True, nullable=False

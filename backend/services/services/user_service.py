@@ -1,4 +1,8 @@
-from backend.schemas.user_schema import UserCredentials, UserGet
+from backend.schemas.user_schema import (
+    UserCredentials,
+    UserGet,
+    UserLogin,
+)
 from backend.core.security.password_hasher import PasswordHasher
 from backend.core.security.token_svc import TokenSvc
 from backend.services.repositories.user_repo import UserRepository
@@ -7,6 +11,9 @@ from backend.core.exceptions.exceptions import (
     NotFoundError,
     AppBaseException,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class UserService:
@@ -31,16 +38,27 @@ class UserService:
         hashed_password = self.password_hasher.hash_password(
             user_credential.password
         )
-        user_credential.password = hashed_password
-        result = await self.user_repo.create_user(user_credential)
-        if result["result"] != "succesfully added user":
+        updated_model = user_credential.model_copy(
+            update={"password": hashed_password}
+        )
+        logging.info(
+            f"DEBUG - Creating user with the email: {updated_model.email}"
+        )
+        result = await self.user_repo.create_user(updated_model)
+        logger.info(f"DEBUG - result= {result}")
+        if result["result"] is False:
             raise AppBaseException()
         get_user = await self.user_repo.get_user_by_email(
-            user_credential.email
+            updated_model.email
+        )
+        logging.info(f"DEBUG - type of get_user: {type(get_user)}")
+        logging.info(f"DEBUG - get_user values: {get_user}")
+        logger.info(
+            f"DEBUG - get_user.__dict__ if available: {getattr(get_user, '__dict__', 'no __dict__')}"
         )
         return UserGet.model_validate(get_user)
 
-    async def login_user(self, user_credential: UserCredentials):
+    async def login_user(self, user_credential: UserLogin):
         check_if_exists = await self.user_repo.get_user_data(
             user_credential.email
         )

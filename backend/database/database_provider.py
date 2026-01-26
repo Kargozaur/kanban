@@ -10,6 +10,8 @@ class DatabaseProvider:
     ) -> None:
         self.sessionmaker = sessionmaker
 
-    async def session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def session_generator(
+        self,
+    ) -> AsyncGenerator[AsyncSession, None]:
         async with self.sessionmaker() as session:
             yield session

@@ -1,4 +1,4 @@
-from pydantic import Field, PostgresDsn, BaseModel
+from pydantic import Field, PostgresDsn
 from typing import Annotated
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
