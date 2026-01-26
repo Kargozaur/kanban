@@ -1,7 +1,7 @@
 import logging
 from enum import StrEnum
 from typing import Final
-from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LoggingLevel(StrEnum):
@@ -33,5 +33,7 @@ def configure_logging(
     )
 
 
-class LoggingSettings(BaseModel):
+class LoggingSettings(BaseSettings):
     level: LoggingLevel
+
+    model_config = SettingsConfigDict(env_prefix="LOGGING")

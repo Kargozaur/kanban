@@ -26,7 +26,9 @@ class UserRepository:
         Get's user. If user doesn't exists
         """
         query = self._get_user_by_email_helper(email)
-        query = query.options(load_only(User.id, User.email))
+        query = query.options(
+            load_only(User.id, User.email, User.name)
+        )
         result = await self.session.execute(query)
         row = result.scalar_one_or_none()
         if row is None:
@@ -44,7 +46,9 @@ class UserRepository:
             if check_user is True:
                 raise
             from_orm_user = User(
-                email=user_data.email, password=user_data.password
+                email=user_data.email,
+                name=user_data.name,
+                password=user_data.password,
             )
             self.session.add(from_orm_user)
             await self.session.flush(from_orm_user)
