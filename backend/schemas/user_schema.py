@@ -24,7 +24,7 @@ class UserCredentials(BaseModel):
         if not self.name or not self.name.strip():
             self.name = (
                 self.email.split("@")[0]
-                .replace("_", 0)
+                .replace("_", " ")
                 .replace(".", " ")
             )
         return self
