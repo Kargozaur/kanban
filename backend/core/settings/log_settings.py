@@ -25,7 +25,7 @@ FMT: Final[str] = (
 DATEFMT: Final[str] = "%Y-%m-%d %H:%M:%S"
 
 
-async def configure_logging(
+def configure_logging(
     *, level: LoggingLevel = DEFAULT_LOG_LEVEL
 ) -> None:
     logging.basicConfig(
