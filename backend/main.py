@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
         return ORJSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
-                "detail": "App base exception",
+                "detail": "Pydantic validation error",
                 "errors": exc.errors(
                     include_input=False, include_url=False
                 ),
