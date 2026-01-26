@@ -18,6 +18,7 @@ def create_engine(settings: AppSettings) -> AsyncEngine:
         echo_pool=settings.sqlalchemy.echo_pool,
         pool_size=settings.sqlalchemy.pool_size,
         max_overflow=settings.sqlalchemy.max_overflow,
+        connect_args={"server_settings": {"client_encoding": "utf8"}},
     )
 
 
