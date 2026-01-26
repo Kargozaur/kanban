@@ -15,7 +15,6 @@ from backend.core.exceptions.exceptions import (
     NotFoundError,
 )
 import logging
-import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -74,11 +73,10 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(Exception)
     async def other_exceptions(request: Request, exc: Exception):
-        traceback_str = "".join(traceback.format_exc())
         logging.exception(msg="Python base exception")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": traceback_str},
+            content={"detail": exc.__class__.__name__},
             headers=getattr(exc, "headers", None),
         )
 
