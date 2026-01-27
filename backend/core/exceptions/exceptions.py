@@ -19,3 +19,9 @@ class TokenError(AppBaseException):
     status_code = 401
     detail = "Could not validate your token"
     headers = {"WWW-Authenticate": "Bearer"}
+
+
+class PermissionError(AppBaseException):
+    status_code = 401
+    detail = "You are not authorized to perform this action"
+    headers = {"WWW-Authenticate": "Bearer"}
