@@ -3,10 +3,16 @@ from sqlalchemy.orm import (
     declared_attr,
     Mapped,
     mapped_column,
+    relationship,
 )
 from sqlalchemy.types import String, UUID
 from backend.models.camel_to_snake import camel_to_snake
-from backend.models.mixins import CreatedAt, UpdatedAt
+from backend.models.mixins import (
+    CreatedAt,
+    UpdatedAt,
+    OwnedBy,
+    IdMixin,
+)
 from uuid import uuid4, UUID as uuid
 
 
@@ -25,3 +31,14 @@ class User(CreatedAt, UpdatedAt, Base):
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    boards: Mapped[list["Boards"]] = relationship(
+        "Boards", back_populates="user"
+    )
+
+
+class Boards(IdMixin, OwnedBy, CreatedAt, Base):
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(
+        String(200), nullable=False, default=""
+    )

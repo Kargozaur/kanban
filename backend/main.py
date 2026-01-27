@@ -89,6 +89,10 @@ def create_app() -> FastAPI:
             headers=getattr(exc, "headers", None),
         )
 
+    @app.get("/")
+    async def main():
+        return {"App": "Kanban"}
+
     return app
 
 
