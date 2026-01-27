@@ -93,3 +93,20 @@ class Columns(IdMixin, Base):
     boards: Mapped["Boards"] = relationship(
         "Boards", back_populates="columns"
     )
+    tasks: Mapped[list["Tasks"]] = relationship(
+        "Tasks", back_populates="columns"
+    )
+
+
+class Tasks(IdMixin, OwnedBy, CreatedAt, Base):
+    column_id: Mapped[int] = mapped_column(
+        ForeignKey("columns.id", ondelete="SET NULL")
+    )
+    title: Mapped[str] = mapped_column(String(70), nullable=False)
+    description: Mapped[str] = mapped_column(
+        String(200),
+    )
+    position: Mapped[int]
+    columns: Mapped["Columns"] = relationship(
+        "Columns", back_populates="tasks"
+    )
