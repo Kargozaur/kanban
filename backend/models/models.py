@@ -54,19 +54,24 @@ class Boards(IdMixin, OwnedBy, CreatedAt, Base):
         back_populates="boards",
         cascade="all, delete-orphan",
     )
+    columns: Mapped[list["Columns"]] = relationship(
+        "Columns",
+        back_populates="boards",
+        cascade="all, delete-orphan",
+    )
 
 
 class BoardMembers(IdMixin, Base):
-    """OwnedBy mixin isn't used to the possibility of the large amount of write/insert/delete operations.\n"""
+    """OwnedBy mixin isn't used due to the possibility of the large amount of write/insert/delete operations.\n"""
 
     board_id: Mapped[int] = mapped_column(
-        ForeignKey("boards.id"),
+        ForeignKey("boards.id", ondelete="CASCADE"),
         unique=True,
         index=True,
         primary_key=True,
     )
     user_id: Mapped[uuid] = mapped_column(
-        ForeignKey("user.id"), primary_key=True
+        ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
     role: Mapped[RoleEnum] = mapped_column(nullable=False)
     boards: Mapped["Boards"] = relationship(
@@ -74,4 +79,17 @@ class BoardMembers(IdMixin, Base):
     )
     user: Mapped["User"] = relationship(
         "User", back_populates="board_members"
+    )
+
+
+class Columns(IdMixin, Base):
+    board_id: Mapped[int] = mapped_column(
+        ForeignKey("boards.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(100))
+    position: Mapped[int] = mapped_column(nullable=False)
+    wip_limit: Mapped[int] = mapped_column(nullable=True)
+
+    boards: Mapped["Boards"] = relationship(
+        "Boards", back_populates="columns"
     )
