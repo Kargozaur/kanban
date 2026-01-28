@@ -1,7 +1,6 @@
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
-from pydantic import ValidationError
 from backend.core.settings.settings import get_settings
 from backend.core.settings.log_settings import configure_logging
 from backend.database.db_config import init_db
@@ -9,17 +8,17 @@ from backend.database.database_provider import DatabaseProvider
 from backend.core.security.password_hasher import get_hasher
 from backend.core.security.token_svc import get_token_svc
 from backend.api.routers import api_router
-from backend.core.exceptions.exceptions import (
-    AppBaseException,
-    InvalidCredentialsError,
-    NotFoundError,
-    TokenError,
-    PermissionError,
+from backend.exceptions_handlers.base_exception_handler import (
+    base_exception_handler,
 )
-from backend.core.exceptions.board_exceptions import (
-    BoardBaseException,
-    BoardNotFound,
-    BoardPermissionDenied,
+from backend.exceptions_handlers.board_handler import (
+    board_exceptions_handler,
+)
+from backend.exceptions_handlers.pydantic_handler import (
+    pydantic_exceptions_handler,
+)
+from backend.exceptions_handlers.user_handler import (
+    user_exception_handler,
 )
 import logging
 
@@ -37,104 +36,12 @@ def create_app() -> FastAPI:
         full CRUD operations on kanban boards. 
     """,
     )
+    base_exception_handler(app)
+    board_exceptions_handler(app)
+    pydantic_exceptions_handler(app)
+    user_exception_handler(app)
+
     app.include_router(api_router)
-
-    @app.exception_handler(ValidationError)
-    async def validation_error(
-        request: Request, exc: ValidationError
-    ):
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            content={
-                "detail": "Pydantic validation error",
-                "errors": exc.errors(
-                    include_input=False, include_url=False
-                ),
-            },
-        )
-
-    @app.exception_handler(AppBaseException)
-    async def base_exception(request: Request, exc: AppBaseException):
-        logging.exception("Application base exception")
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-            headers=getattr(exc, "headers", None),
-        )
-
-    @app.exception_handler(InvalidCredentialsError)
-    async def invalid_credentials_error(
-        request: Request, exc: InvalidCredentialsError
-    ):
-        logging.exception("Invalid credentials exception")
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-            headers=exc.headers,
-        )
-
-    @app.exception_handler(NotFoundError)
-    async def not_found_exception(
-        request: Request, exc: NotFoundError
-    ):
-        logging.exception("Not found exception")
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-            headers=getattr(exc, "headers", None),
-        )
-
-    @app.exception_handler(TokenError)
-    async def token_exception(request: Request, exc: TokenError):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-            headers=exc.headers,
-        )
-
-    @app.exception_handler(PermissionError)
-    async def permission_exception(
-        request: Request, exc: PermissionError
-    ):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-            headers=exc.headers,
-        )
-
-    @app.exception_handler(BoardBaseException)
-    async def board_base_exception(
-        request: Request, exc: BoardBaseException
-    ):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-        )
-
-    @app.exception_handler(BoardPermissionDenied)
-    async def board_permission_denied(
-        request: Request, exc: BoardPermissionDenied
-    ):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-        )
-
-    @app.exception_handler(BoardNotFound)
-    async def board_not_found(request: Request, exc: BoardNotFound):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-        )
-
-    @app.exception_handler(Exception)
-    async def other_exceptions(request: Request, exc: Exception):
-        logging.exception(msg="Python base exception")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": exc.__class__.__name__},
-            headers=getattr(exc, "headers", None),
-        )
 
     @app.get("/")
     async def main():
