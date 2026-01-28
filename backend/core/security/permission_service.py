@@ -17,7 +17,7 @@ class PermissionService:
         self,
         user_id: UUID,
         board_id: int,
-        requires_roles: list[RoleEnum],
+        required_roles: list[RoleEnum],
     ) -> bool:
         query = (
             select(Boards.owner_id, BoardMembers.role)
@@ -37,7 +37,7 @@ class PermissionService:
         owner_id, role = row
         if owner_id == user_id:
             return True
-        if role in requires_roles:
+        if role in required_roles:
             return True
         raise BoardPermissionDenied(
             "You dont have required permission"
