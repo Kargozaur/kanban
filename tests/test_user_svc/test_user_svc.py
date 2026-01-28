@@ -47,6 +47,42 @@ def test_user_login(client):
     assert data["token_type"] == "Bearer"
 
 
+def test_password(client):
+    client.post(
+        "/api/v1/auth/sign_up",
+        json={
+            "email": "user@example.com",
+            "password": "SuperPassword!23",
+        },
+    )
+    result = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "user@example.com",
+            "password": "WrongPassw0rd",
+        },
+    )
+    assert result.status_code == 401
+
+
+def test_email(client):
+    client.post(
+        "/api/v1/auth/sign_up",
+        json={
+            "email": "user@example.com",
+            "password": "SuperPassword!23",
+        },
+    )
+    result = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "user2@example.com",
+            "password": "SuperPassword!23",
+        },
+    )
+    assert result.status_code == 404
+
+
 def test_user_logout(client):
     client.post(
         "/api/v1/auth/sign_up",

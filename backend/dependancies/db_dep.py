@@ -8,6 +8,6 @@ DBDep = Annotated[
     AsyncSession,
     Depends(get_db),
     Doc(
-        "Dependancy for the database sessions. Relies on DatabaseProvider(Adapter)"
+        "Dependancy for the database sessions. Relies on DatabaseProvider"
     ),
 ]
