@@ -29,7 +29,13 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """FastAPI app factory"""
     app = FastAPI(
-        lifespan=lifespan, default_response_class=JSONResponse
+        lifespan=lifespan,
+        default_response_class=JSONResponse,
+        description="""
+        FastAPI backend for the Kanban app.
+        App handles JWT authentication. Role management based on the FastAPI dependancies,
+        full CRUD operations on kanban boards. 
+    """,
     )
     app.include_router(api_router)
 
