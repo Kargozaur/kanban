@@ -1,8 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from uuid import UUID
 from backend.core.utility.role_enum import RoleEnum
-from backend.models.models import BoardMembers
+from backend.models.models import BoardMembers, Boards
+from backend.core.exceptions.board_exceptions import (
+    BoardPermissionDenied,
+)
 
 
 class PermissionService:
@@ -15,12 +18,24 @@ class PermissionService:
         board_id: int,
         requires_roles: list[RoleEnum],
     ) -> bool:
-        query = select(BoardMembers.role).where(
-            BoardMembers.user_id == user_id,
-            BoardMembers.board_id == board_id,
+        query = (
+            select(Boards.owner_id, BoardMembers.role)
+            .outerjoin(
+                BoardMembers,
+                and_(
+                    BoardMembers.board_id == Boards.id,
+                    BoardMembers.user_id == user_id,
+                ),
+            )
+            .where(Boards.id == board_id)
         )
         result = await self.session.execute(query)
-        role = result.scalar_one_or_none()
-        if not role or role not in requires_roles:
-            raise
-        return True
+        row = result.fetchone()
+        owner_id, role = row
+        if owner_id == user_id:
+            return True
+        if role in requires_roles:
+            return True
+        raise BoardPermissionDenied(
+            "You dont have required permission"
+        )
