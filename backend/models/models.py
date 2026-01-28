@@ -42,6 +42,10 @@ class User(CreatedAt, UpdatedAt, Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    tasks: Mapped[list["Tasks"]] = relationship(
+        "Tasks",
+        back_populates="user",
+    )
 
 
 class Boards(IdMixin, OwnedBy, CreatedAt, Base):
