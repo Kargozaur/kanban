@@ -10,7 +10,7 @@ def test_user_creation(client):
         },
     )
     data = result.json()
-    assert result.status_code == 200
+    assert result.status_code == 201
     assert data["email"] == "user@example.com"
 
 
