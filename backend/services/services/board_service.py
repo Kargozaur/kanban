@@ -52,17 +52,17 @@ class BoardService:
         return BoardFullView.model_validate(result)
 
     async def update_board(
-        self, id: int, data_to_update: BoardUpdate
+        self, board_id: int, data_to_update: BoardUpdate
     ):
         try:
             result = await self.board_repo.update_board(
-                id=id,
+                board_id=board_id,
                 data_to_update=data_to_update,
             )
             logging.info(f"DEBUG - result = {result}")
             if result is None:
                 raise BoardNotFound(
-                    f"Coudn't find a board with the id: {id}"
+                    f"Coudn't find a board with the id: {board_id}"
                 )
 
             return BoardGet.model_validate(result)

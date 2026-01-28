@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import (
     DeclarativeBase,
     declared_attr,
@@ -65,7 +65,7 @@ class Boards(IdMixin, OwnedBy, CreatedAt, Base):
     )
 
 
-class BoardMembers(IdMixin, Base):
+class BoardMembers(Base):
     """OwnedBy mixin isn't used due to the possibility of the large amount of write/insert/delete operations.\n"""
 
     board_id: Mapped[int] = mapped_column(
@@ -84,6 +84,8 @@ class BoardMembers(IdMixin, Base):
     user: Mapped["User"] = relationship(
         "User", back_populates="board_members"
     )
+
+    __table_args__ = (UniqueConstraint("board_id", "user_id"),)
 
 
 class Columns(IdMixin, Base):

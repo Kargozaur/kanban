@@ -105,7 +105,7 @@ class BoardRepository:
         return row
 
     async def update_board(
-        self, id: int, data_to_update: BoardUpdate
+        self, board_id: int, data_to_update: BoardUpdate
     ):
         """
         Updates Boards table. User has to have Admin role. Role is managed inside the endpoint
@@ -116,7 +116,7 @@ class BoardRepository:
         Returns:
            None | updated_board
         """
-        board = await self.session.get(Boards, id)
+        board = await self.session.get(Boards, board_id)
         to_update = data_to_update.model_dump(
             exclude_unset=True, exclude_none=True
         )

@@ -71,7 +71,7 @@ async def update_board(
     board_id: int, board_svc: BoardSvcDep, new_data: BoardUpdate
 ):
     return await board_svc.update_board(
-        id=id, data_to_update=new_data
+        board_id=board_id, data_to_update=new_data
     )
 
 
