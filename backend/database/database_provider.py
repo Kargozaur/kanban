@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 
 
 class DatabaseProvider:
-    """Database adapter for the lifespan"""
+    """Database provider for the lifespan"""
 
     def __init__(
         self, sessionmaker: async_sessionmaker[AsyncSession]
