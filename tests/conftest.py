@@ -7,6 +7,7 @@ from backend.main import create_app
 from backend.database.session_provider import get_db
 from backend.models.models import Base
 from tests.db import test_engine
+import uuid
 
 
 async def override_get_db():
@@ -39,3 +40,28 @@ def client() -> FastAPI:
 
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture
+def auth_client(client):
+    email = f"user_{uuid.uuid4().hex}@example.com"
+    password = "SuperPassword!23"
+    resp = client.post(
+        "/api/v1/auth/sign_up",
+        json={
+            "email": email,
+            "password": password,
+        },
+    )
+
+    assert resp.status_code in (200, 201)
+    login = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": email,
+            "password": password,
+        },
+    )
+    assert login.status_code == 201
+
+    return client
