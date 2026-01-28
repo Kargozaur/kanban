@@ -8,7 +8,6 @@ from backend.dependancies.permission_dep import PermissionDep
 from backend.schemas.board_schema import (
     BoardCreate,
     BoardGet,
-    BoardFullView,
     BoardUpdate,
 )
 from typing import Annotated
@@ -64,7 +63,6 @@ async def get_full_board(
 
 @board_router.patch(
     "/{board_id}",
-    response_model=BoardGet,
     status_code=200,
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     description="Updates board based on data provided. User has to have admin role to perform this action",
