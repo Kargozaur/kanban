@@ -31,7 +31,7 @@ class BoardService:
             logging.info(f"DEBIG - result = {result}")
             return BoardGet.model_validate(result)
         except Exception as exc:
-            raise BoardBaseException(f"Failed to create board: {exc}")
+            raise exc  # BoardBaseException(f"Failed to create board: {exc}")
 
     async def get_boards(self, user_id: UUID, pagination: Pagination):
         result = await self.board_repo.get_boards(

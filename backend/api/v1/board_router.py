@@ -38,7 +38,6 @@ async def create_board(
 @board_router.get(
     "/all",
     status_code=200,
-    response_model=list[BoardGet],
     description="Returns all boards where user presented",
     response_description="returns a list of all the boards, where user exists",
 )
@@ -48,31 +47,30 @@ async def get_all_boards(
     pagination: PaginationDep,
 ):
     return await board_svc.get_boards(
-        owner_id=current_user.id, pagination=pagination
+        user_id=current_user.id, pagination=pagination
     )
 
 
 @board_router.get(
     "/{id}",
-    response_model=BoardFullView,
     description="Gets a full about the board",
     response_description="Gets a full data about the Board",
 )
 async def get_full_board(
     id: int, board_svc: BoardSvcDep, current_user: CurrentUserDep
 ):
-    return await board_svc.get_board(owner_id=current_user.id, id=id)
+    return await board_svc.get_board(user_id=current_user.id, id=id)
 
 
 @board_router.patch(
-    "/{id}",
+    "/{board_id}",
     response_model=BoardGet,
     status_code=200,
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     description="Updates board based on data provided. User has to have admin role to perform this action",
 )
 async def update_board(
-    id: int, board_svc: BoardSvcDep, new_data: BoardUpdate
+    board_id: int, board_svc: BoardSvcDep, new_data: BoardUpdate
 ):
     return await board_svc.update_board(
         id=id, data_to_update=new_data
@@ -80,10 +78,10 @@ async def update_board(
 
 
 @board_router.delete(
-    "/{id}",
+    "/{board_id}",
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     description="Deletes board. User has to have an admin role to perform this action",
 )
-async def delete_board(id: int, board_svc: BoardSvcDep):
-    result = await board_svc.delete_board(id)
-    return Response(status_code=204, content={"detail": result})
+async def delete_board(board_id: int, board_svc: BoardSvcDep):
+    await board_svc.delete_board(board_id)
+    return Response(status_code=204)

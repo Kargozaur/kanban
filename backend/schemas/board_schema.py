@@ -29,14 +29,17 @@ class BoardCreate(BaseModel):
     ]
 
 
-class BoardGet(BaseModel):
+class BoardGetBase(BaseModel):
     id: int
     name: str
     description: str
     created_at: datetime
-    owned_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BoardGet(BoardGetBase):
+    owner_id: UUID
 
 
 class BoardUpdate(BaseModel):
@@ -74,15 +77,17 @@ class ColumnBoardView(BaseModel):
     id: int
     name: str
     orders: int
-    tasks: list[TaskBoardView] = []
+    tasks: list[TaskBoardView] = Field(default=list)
 
 
 class BoardFullView(BaseModel):
     id: int
     name: str
     description: str
-    owned_id: UUID
+    owner_id: UUID
     created_at: datetime
 
     board_members: list[MemberView] = Field(default_factory=list)
     columns: list[ColumnBoardView] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)

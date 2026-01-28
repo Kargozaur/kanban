@@ -5,6 +5,7 @@ from backend.core.utility.role_enum import RoleEnum
 from backend.models.models import BoardMembers, Boards
 from backend.core.exceptions.board_exceptions import (
     BoardPermissionDenied,
+    BoardNotFound,
 )
 
 
@@ -31,6 +32,8 @@ class PermissionService:
         )
         result = await self.session.execute(query)
         row = result.fetchone()
+        if row is None:
+            raise BoardNotFound("Board with this id is not found")
         owner_id, role = row
         if owner_id == user_id:
             return True

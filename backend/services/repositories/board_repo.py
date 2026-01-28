@@ -41,7 +41,7 @@ class BoardRepository:
             orm_board | Exception
         """
         orm_board = Boards(
-            user_id=owner_id,
+            owner_id=owner_id,
             name=board_data.name,
             description=board_data.description,
         )
