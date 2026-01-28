@@ -1,4 +1,5 @@
 from typing import Annotated
+from typing_extensions import Doc
 from fastapi import Depends
 from backend.dependancies.states import (
     get_hasher,
@@ -22,11 +23,41 @@ def get_board_repository(db: DBDep) -> BoardRepository:
     return BoardRepository(db)
 
 
-TokenDep = Annotated[TokenSvc, Depends(get_token_svc)]
-PasswordDep = Annotated[PasswordHasher, Depends(get_hasher)]
-UserRepoDep = Annotated[UserRepository, Depends(get_user_repository)]
-SettingsDep = Annotated[AppSettings, Depends(get_settings)]
-PaginationDep = Annotated[Pagination, Depends()]
+TokenDep = Annotated[
+    TokenSvc,
+    Depends(get_token_svc),
+    Doc("Dependancy of the Tocker Service(jwt encoding)"),
+]
+PasswordDep = Annotated[
+    PasswordHasher,
+    Depends(get_hasher),
+    Doc("Dependancy of the Password hasher for the UserService"),
+]
+UserRepoDep = Annotated[
+    UserRepository,
+    Depends(get_user_repository),
+    Doc(
+        "Dependancy of the User repository for the UserService. Depends on DBDep"
+    ),
+]
+SettingsDep = Annotated[
+    AppSettings,
+    Depends(get_settings),
+    Doc(
+        "Global dependancy of the AppSettings. Managed inside the FastAPI lifespan"
+    ),
+]
+PaginationDep = Annotated[
+    Pagination,
+    Depends(),
+    Doc(
+        "Dependancy of the Pagination. Sets limit and offset for both the request and SQL queries"
+    ),
+]
 BoardRepoDep = Annotated[
-    BoardRepository, Depends(get_board_repository)
+    BoardRepository,
+    Depends(get_board_repository),
+    Doc(
+        "Dependancy of the Board repository for the BoardService. Depends on DBDep"
+    ),
 ]

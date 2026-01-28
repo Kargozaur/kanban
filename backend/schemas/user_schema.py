@@ -6,10 +6,18 @@ from pydantic import (
     model_validator,
 )
 from typing import Annotated, Optional
+from typing_extensions import Doc
 from backend.core.utility.password_verifier import verify_password
 from uuid import UUID
 
-PasswordField = Annotated[str, BeforeValidator(verify_password)]
+PasswordField = Annotated[
+    str,
+    BeforeValidator(verify_password),
+    Doc(
+        "Password field for the User registration.\n "
+        "Based on verify_password function with the regex within it."
+    ),
+]
 
 
 class UserCredentials(BaseModel):

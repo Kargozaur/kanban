@@ -1,6 +1,7 @@
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
+from typing_extensions import Doc
 from backend.core.security.user_auth import AuthService
 from backend.dependancies.db_dep import DBDep
 from backend.dependancies.annotated_types import SettingsDep
@@ -22,4 +23,10 @@ async def current_user_dep(
     return await auth_svc.get_user(token)
 
 
-CurrentUserDep = Annotated[User, Depends(current_user_dep)]
+CurrentUserDep = Annotated[
+    User,
+    Depends(current_user_dep),
+    Doc(
+        "Dependancy of the AuthService to verify the current user. Depends on SettingsDep, DBDep"
+    ),
+]

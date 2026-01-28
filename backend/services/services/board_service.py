@@ -33,18 +33,16 @@ class BoardService:
         except Exception as exc:
             raise BoardBaseException(f"Failed to create board: {exc}")
 
-    async def get_boards(
-        self, owner_id: UUID, pagination: Pagination
-    ):
+    async def get_boards(self, user_id: UUID, pagination: Pagination):
         result = await self.board_repo.get_boards(
-            owner_id=owner_id, pagination=pagination
+            user_id=user_id, pagination=pagination
         )
         logging.info(f"DEBUG - result = {result}")
         return [BoardGet.model_validate(values) for values in result]
 
-    async def get_board(self, owner_id: UUID, id: int):
+    async def get_board(self, user_id: UUID, id: int):
         result = await self.board_repo.get_board(
-            owner_id=owner_id, id=id
+            user_id=user_id, id=id
         )
         logging.info(f"DEBUG - result = {result}")
         if result is None:

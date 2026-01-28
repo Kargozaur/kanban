@@ -19,9 +19,9 @@ class BoardRepository:
         self.session = session
 
     def _select_query_builder(
-        self, owner_id: UUID, id: int | None = None
+        self, user_id: UUID, id: int | None = None
     ):
-        query = select(Boards).where(Boards.owner_id == owner_id)
+        query = select(Boards).where(Boards.owner_id == user_id)
         if id is not None:
             query = query.where(Boards.id == id)
         return query
@@ -29,11 +29,13 @@ class BoardRepository:
     async def create_board(
         self, owner_id: UUID, board_data: BoardCreate
     ):
-        """_summary_
+        """
+        Creates a new entity within a Boards table and BoardMembers. \n
+        Sets owner as admin
 
         Args:
-            owner_id (UUID):
-            board_data (BoardCreate):
+            owner_id (UUID)
+            board_data (BoardCreate)
 
         Returns:
             orm_board | Exception
@@ -59,18 +61,17 @@ class BoardRepository:
             await self.session.rollback()
             raise exc
 
-    async def get_boards(
-        self, owner_id: UUID, pagination: Pagination
-    ):
+    async def get_boards(self, user_id: UUID, pagination: Pagination):
         """
+        Get all boards, where current user represented
         Args:
-            owner_id (UUID):
+            user_id (UUID)
             pagination (Pagination): Pydantic Pagination schema
 
         Returns:
             rows
         """
-        query = self._select_query_builder(owner_id=owner_id)
+        query = self._select_query_builder(user_id=user_id)
         query = query.limit(pagination.limit).offset(
             pagination.offset
         )
@@ -78,8 +79,18 @@ class BoardRepository:
         rows = result.scalars().all()
         return rows
 
-    async def get_board(self, owner_id: UUID, id: int):
-        query = self._select_query_builder(owner_id=owner_id, id=id)
+    async def get_board(self, user_id: UUID, id: int):
+        """
+
+        Get full info about the board
+        Args:
+            owner_id (UUID):
+            id (int): id of the board inside the Boards table
+
+        Returns:
+
+        """
+        query = self._select_query_builder(user_id=user_id, id=id)
         query = query.options(
             selectinload(Boards.board_members).joinedload(
                 BoardMembers.user
@@ -97,10 +108,9 @@ class BoardRepository:
         self, id: int, data_to_update: BoardUpdate
     ):
         """
-
+        Updates Boards table. User has to have Admin role. Role is managed inside the endpoint
         Args:
-            id (int)
-            owner_id (UUID)
+            id (int): id of the table
             data_to_update (BoardUpdate): Pydantic BoardUpdate schema
 
         Returns:
@@ -127,9 +137,11 @@ class BoardRepository:
 
     async def delete_board(self, id: int):
         """
+        Deletes board. To delete the board, user has to have Admin role. \n
+        Role is managed inside the router
         Args:
-            id (int): _description_
-            owner_id (UUID): _description_
+            id (int): id of the table
+            user_id (UUID):
 
         Returns:
             dict ["result", "detail"]

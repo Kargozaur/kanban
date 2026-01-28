@@ -6,6 +6,12 @@ from backend.dependancies.auth_dep import CurrentUserDep
 
 
 def PermissionDep(required_roles: list[RoleEnum]):
+    """
+    Permission Dependancy for the requests, related to the endpoints. \n
+    It is managed inside the router like this : \n
+    @router.patch("/", dependancies=[PermissionDep(RoleEnum.ADMIN)])
+    """
+
     async def permission_checker(
         board_id: int, user: CurrentUserDep, session: DBDep
     ):

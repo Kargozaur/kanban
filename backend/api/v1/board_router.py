@@ -18,7 +18,13 @@ BoardSvcDep = Annotated[BoardService, Depends(get_board_svc)]
 board_router = APIRouter(prefix="/board", tags=["Board"])
 
 
-@board_router.post("/", status_code=201, response_model=BoardGet)
+@board_router.post(
+    "/",
+    status_code=201,
+    response_model=BoardGet,
+    description="Endpoint to create a new board",
+    response_description="Returns board id, name, description, created and owner.",
+)
 async def create_board(
     board_svc: BoardSvcDep,
     current_user: CurrentUserDep,
@@ -30,7 +36,11 @@ async def create_board(
 
 
 @board_router.get(
-    "/all", status_code=200, response_model=list[BoardGet]
+    "/all",
+    status_code=200,
+    response_model=list[BoardGet],
+    description="Returns all boards where user presented",
+    response_description="returns a list of all the boards, where user exists",
 )
 async def get_all_boards(
     board_svc: BoardSvcDep,
@@ -42,7 +52,12 @@ async def get_all_boards(
     )
 
 
-@board_router.get("/{id}", response_model=BoardFullView)
+@board_router.get(
+    "/{id}",
+    response_model=BoardFullView,
+    description="Gets a full about the board",
+    response_description="Gets a full data about the Board",
+)
 async def get_full_board(
     id: int, board_svc: BoardSvcDep, current_user: CurrentUserDep
 ):
@@ -54,6 +69,7 @@ async def get_full_board(
     response_model=BoardGet,
     status_code=200,
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
+    description="Updates board based on data provided. User has to have admin role to perform this action",
 )
 async def update_board(
     id: int, board_svc: BoardSvcDep, new_data: BoardUpdate
@@ -64,7 +80,9 @@ async def update_board(
 
 
 @board_router.delete(
-    "/{id}", dependencies=[PermissionDep([RoleEnum.ADMIN])]
+    "/{id}",
+    dependencies=[PermissionDep([RoleEnum.ADMIN])],
+    description="Deletes board. User has to have an admin role to perform this action",
 )
 async def delete_board(id: int, board_svc: BoardSvcDep):
     result = await board_svc.delete_board(id)
