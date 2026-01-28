@@ -6,18 +6,27 @@ from backend.core.utility.role_enum import RoleEnum
 
 
 class BoardCreate(BaseModel):
-    name: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        title="Board Name",
-        description="The display name of the kanban board. must be unique for the user",
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="Long form explonation of the board purpose",
-        examples=["This board tracks the developmenr of the new app"],
-    )
+    name: Annotated[
+        str,
+        Field(
+            ...,
+            min_length=1,
+            max_length=100,
+            title="Board Name",
+            description="The display name of the kanban board. must be unique for the user",
+        ),
+    ]
+    description: Annotated[
+        str,
+        Field(
+            default="",
+            max_length=200,
+            description="Long form explonation of the board purpose",
+            examples=[
+                "This board tracks the developmenr of the new app"
+            ],
+        ),
+    ]
 
 
 class BoardGet(BaseModel):
