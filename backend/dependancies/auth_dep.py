@@ -1,13 +1,11 @@
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, Request
 from typing import Annotated
 from typing_extensions import Doc
 from backend.core.security.user_auth import AuthService
 from backend.dependancies.db_dep import DBDep
 from backend.dependancies.annotated_types import SettingsDep
 from backend.models.models import User
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+from backend.core.exceptions.exceptions import InvalidCredentialsError
 
 
 def get_auth_service(
@@ -17,9 +15,12 @@ def get_auth_service(
 
 
 async def current_user_dep(
+    request: Request,
     auth_svc: AuthService = Depends(get_auth_service),
-    token: str = Depends(oauth2_scheme),
 ) -> User:
+    token = request.cookies.get("access_token")
+    if not token:
+        raise InvalidCredentialsError()
     return await auth_svc.get_user(token)
 
 
