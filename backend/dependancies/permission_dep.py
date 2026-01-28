@@ -8,6 +8,7 @@ from backend.dependancies.auth_dep import CurrentUserDep
 def PermissionDep(required_roles: list[RoleEnum]):
     """
     Permission Dependancy for the requests, related to the endpoints. \n
+    Manages BoardMembers table. Checks the of the user inside the table.
     It is managed inside the router like this : \n
     @router.patch("/", dependancies=[PermissionDep(RoleEnum.ADMIN)])
     """
