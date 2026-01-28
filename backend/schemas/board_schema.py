@@ -23,7 +23,7 @@ class BoardCreate(BaseModel):
             max_length=200,
             description="Long form explonation of the board purpose",
             examples=[
-                "This board tracks the developmenr of the new app"
+                "This board tracks the development of the new app"
             ],
         ),
     ]
