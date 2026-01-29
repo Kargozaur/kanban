@@ -61,6 +61,21 @@ def test_get_board(auth_client):
     assert len(data) > 0
 
 
+def test_unathoreized_get(unathorized_client, auth_client):
+    auth_client.post(
+        "/api/v1/board/",
+        json={
+            "name": "Test board",
+            "description": "Some description in here",
+        },
+    )
+    result = auth_client.get("/api/v1/board/all")
+    data = result.json()
+    id = data[0]["id"]
+    response = unathorized_client.get(f"/api/v1/board/{id}")
+    assert response.status_code == 401
+
+
 def test_board_without_creation(auth_client):
     result = auth_client.get("/api/v1/board/all")
     data = result.json()

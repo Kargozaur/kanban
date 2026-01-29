@@ -8,6 +8,7 @@ from backend.database.session_provider import get_db
 from backend.models.models import Base
 from tests.db import test_engine
 import uuid
+from typing import Generator
 
 
 async def override_get_db():
@@ -34,7 +35,16 @@ def create_tables():
 
 
 @pytest.fixture
-def client() -> FastAPI:
+def client() -> Generator[FastAPI]:
+    app = create_app()
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as client:
+        yield client
+
+
+@pytest.fixture
+def unathorized_client() -> Generator[FastAPI]:
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
 
