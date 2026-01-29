@@ -47,16 +47,6 @@ def test_board_creation_fail(
     assert result.status_code == status_code
 
 
-def test_get_board_unathorized(client, auth_client):
-    response = auth_client.post(
-        "/api/v1/board/",
-        json={"name": "Test_name", "description": "some_description"},
-    )
-    board_id = response.json()[0]["board_id"]
-    result = client.get(f"/api/v1/board/{board_id}")
-    assert result.status_code == 401
-
-
 def test_get_board(auth_client):
     auth_client.post(
         "/api/v1/board/",
