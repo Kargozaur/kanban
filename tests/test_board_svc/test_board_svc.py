@@ -11,7 +11,17 @@ def test_board_creation(auth_client):
     )
     data = result.json()
     assert result.status_code == 201
-    assert data
+    assert "id" in data
+
+
+def test_with_empty_description(auth_client):
+    result = auth_client.post(
+        "/api/v1/board/",
+        json={"name": "Test board"},
+    )
+    data = result.json()
+    assert result.status_code == 201
+    assert "id" in data
 
 
 def test_board_creation_fail(auth_client):
