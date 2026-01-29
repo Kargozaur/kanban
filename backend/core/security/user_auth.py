@@ -31,7 +31,8 @@ class AuthService:
         token_data = self.verify_access_token(
             token, credential_exception
         )
-        assert token_data.sub
+        if token_data.sub is None:
+            raise credential_exception
         user_id = token_data.sub
         user = await self.session.get(User, user_id)
         if not user:

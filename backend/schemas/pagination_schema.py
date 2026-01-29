@@ -9,8 +9,8 @@ class Pagination(BaseModel):
             default=10,
             ge=1,
             le=20,
-            description="Limit for both database queries and Endpoints. Dependency for the endpoints is\n"
-            "managed by PaginationDep",
+            description="Limit for both database queries and the endpoints. \n "
+            "Dependency for the endpoints is managed by PaginationDep.",
         ),
     ]
     offset: Annotated[
@@ -18,7 +18,7 @@ class Pagination(BaseModel):
         Field(
             default=0,
             ge=0,
-            description="Offset for both database queries and Endpoints. Dependency for the endpoints is\n"
-            "managed by PaginationDep",
+            description="Offset for both database queries and Endpoints. \n "
+            "Dependency for the endpoints is managed by PaginationDep",
         ),
     ]

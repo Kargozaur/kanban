@@ -10,7 +10,7 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from backend.models.models import User, Base
+from backend.models.models import Base
 from backend.core.settings.settings import get_settings
 from alembic import context
 
