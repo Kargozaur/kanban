@@ -4,6 +4,7 @@ from pydantic import (
     EmailStr,
     ConfigDict,
     model_validator,
+    Field,
 )
 from typing import Annotated, Optional
 from typing_extensions import Doc
@@ -21,9 +22,9 @@ PasswordField = Annotated[
 
 
 class UserCredentials(BaseModel):
-    email: EmailStr
-    password: PasswordField
-    name: Optional[str] = None
+    email: EmailStr = Field(..., examples=["user@example.com"])
+    password: PasswordField = Field(examples=["SuperPassword!123"])
+    name: Optional[str] = Field(default=None, examples=["User Name"])
 
     """validator in case if user didn't set their name"""
 
@@ -39,8 +40,8 @@ class UserCredentials(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: str
-    password: str
+    email: str = Field(..., examples=["user@example.com"])
+    password: str = Field(..., examples=["SuperPassword!123"])
 
 
 class UserGet(BaseModel):

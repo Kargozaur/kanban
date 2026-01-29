@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional, Annotated
 from backend.core.utility.role_enum import RoleEnum
+from backend.schemas.user_schema import UserGet
 
 
 class BoardCreate(BaseModel):
@@ -47,18 +48,10 @@ class BoardUpdate(BaseModel):
     description: Annotated[Optional[str], Field(default=None)] = None
 
 
-class User(BaseModel):
-    id: UUID
-    name: str
-    email: str
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class MemberView(BaseModel):
     user_id: UUID
     role: RoleEnum
-    user: User
+    user: UserGet
 
     model_config = ConfigDict(from_attributes=True)
 
