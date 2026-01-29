@@ -3,6 +3,7 @@ from backend.schemas.user_schema import (
     UserGet,
     UserLogin,
 )
+from backend.schemas.token_schema import TokenResponse
 from backend.core.security.password_hasher import PasswordHasher
 from backend.core.security.token_svc import TokenSvc
 from backend.services.repositories.user_repo import UserRepository
@@ -73,4 +74,5 @@ class UserService:
         access_token = self.token_service.create_token(
             check_if_exists
         )
-        return {"access_token": access_token, "token_type": "Bearer"}
+        token = {"access_token": access_token, "token_type": "Bearer"}
+        return TokenResponse.model_validate(token)

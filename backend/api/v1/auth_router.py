@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, Request
 from typing import Annotated
 from backend.dependancies.user_dep import get_user_service
 from backend.dependancies.auth_dep import CurrentUserDep
@@ -8,7 +8,6 @@ from backend.schemas.user_schema import (
     UserGet,
     UserLogin,
 )
-from backend.schemas.token_schema import TokenResponse
 
 UserSvcDep = Annotated[UserService, Depends(get_user_service)]
 
@@ -32,18 +31,21 @@ async def sign_up(
 @user_auth_router.post(
     "/login",
     status_code=201,
-    response_model=TokenResponse,
     description="Compares user credentials. If credentials right, returns a JWT token",
 )
 async def login(
+    request: Request,
     response: Response,
     user_credentials: UserLogin,
     user_svc: UserSvcDep,
 ):
+    existing_token = request.cookies.get("access_token")
+    if existing_token:
+        return {"message": "You are already logged in"}
     token = await user_svc.login_user(user_credentials)
     response.set_cookie(
         key="access_token",
-        value=token["access_token"],
+        value=token.access_token,
         httponly=True,
         max_age=3600,
         samesite="lax",
@@ -52,11 +54,11 @@ async def login(
 
 
 @user_auth_router.post("/logout")
-async def logout(response: Response):
+async def logout(response: Response, current_user: CurrentUserDep):
     response.delete_cookie(
         key="access_token", httponly=True, samesite="lax"
     )
-    return {"message": "succesfully logged out"}
+    return {"message": "Succesfully logged out"}
 
 
 @user_auth_router.get("/me", response_model=UserGet)
