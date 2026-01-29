@@ -1,39 +1,60 @@
 import pytest
 
 
-def test_board_creation(auth_client):
+@pytest.mark.parametrize(
+    "board_name, description, status_code",
+    [
+        ("Test_board", "Description", 201),
+        ("Mobile app board", "", 201),
+    ],
+)
+def test_board_creation(
+    board_name, description, status_code, auth_client
+):
     result = auth_client.post(
         "/api/v1/board/",
         json={
-            "name": "Test board",
-            "description": "Some description in here",
+            "name": board_name,
+            "description": description,
         },
     )
     data = result.json()
-    assert result.status_code == 201
+    assert result.status_code == status_code
     assert "id" in data
+    assert data["name"] == board_name
 
 
-def test_with_empty_description(auth_client):
-    result = auth_client.post(
-        "/api/v1/board/",
-        json={"name": "Test board"},
-    )
-    data = result.json()
-    assert result.status_code == 201
-    assert "id" in data
-
-
-def test_board_creation_fail(auth_client):
+@pytest.mark.parametrize(
+    "board_name, description, status_code",
+    [
+        ("", "", 422),
+        (None, None, 422),
+        ("", None, 422),
+        (None, "", 422),
+    ],
+)
+def test_board_creation_fail(
+    board_name, description, status_code, auth_client
+):
     result = auth_client.post(
         "/api/v1/board/",
         json={
-            "name": "",
-            "description": "Some description in here",
+            "name": board_name,
+            "description": description,
         },
     )
 
-    assert result.status_code == 422
+    assert result.status_code == status_code
+
+
+def test_get_board_unathorized(client, auth_client):
+    response = auth_client.post(
+        "/api/v1/board/",
+        json={"name": "Test_name", "description": "some_description"},
+    )
+    board_id = response.json()[0]["board_id"]
+    result = client.get(f"/api/v1/board/{board_id}")
+    assert result.status_code == 401
 
 
 def test_get_board(auth_client):
@@ -48,6 +69,13 @@ def test_get_board(auth_client):
     data = result.json()
     assert result.status_code == 200
     assert len(data) > 0
+
+
+def test_board_without_creation(auth_client):
+    result = auth_client.get("/api/v1/board/all")
+    data = result.json()
+    assert result.status_code == 200
+    assert len(data) == 0
 
 
 def test_get_single_board(auth_client):
