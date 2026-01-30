@@ -59,8 +59,8 @@ def test_user_login(email, password, status_code, client):
     )
     result = client.post(
         "/api/v1/auth/login",
-        json={
-            "email": email,
+        data={
+            "username": email,
             "password": password,
         },
     )
@@ -87,8 +87,8 @@ def test_password(email, password, bad_password, status_code, client):
     )
     result = client.post(
         "/api/v1/auth/login",
-        json={
-            "email": email,
+        data={
+            "username": email,
             "password": bad_password,
         },
     )
@@ -122,8 +122,8 @@ def test_email(email, wrong_email, password, status_code, client):
     )
     result = client.post(
         "/api/v1/auth/login",
-        json={
-            "email": wrong_email,
+        data={
+            "username": wrong_email,
             "password": password,
         },
     )
@@ -134,14 +134,14 @@ def test_user_logout(client):
     client.post(
         "/api/v1/auth/sign_up",
         json={
-            "email": "user@example.com",
+            "username": "user@example.com",
             "password": "SuperPassword!23",
         },
     )
     client.post(
         "/api/v1/auth/login",
-        json={
-            "email": "user@example.com",
+        data={
+            "username": "user@example.com",
             "password": "SuperPassword!23",
         },
     )
@@ -168,8 +168,8 @@ def test_me(email, password, status_code, client):
     )
     client.post(
         "/api/v1/auth/login",
-        json={
-            "email": email,
+        data={
+            "username": email,
             "password": password,
         },
     )

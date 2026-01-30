@@ -66,8 +66,8 @@ def auth_client(client):
     assert resp.status_code in (200, 201)
     login = client.post(
         "/api/v1/auth/login",
-        json={
-            "email": email,
+        data={
+            "username": email,
             "password": password,
         },
     )
