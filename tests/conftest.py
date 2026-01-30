@@ -64,9 +64,13 @@ async def client(
 @pytest.fixture
 async def unathorized_client() -> AsyncGenerator[AsyncClient, None]:
     app = create_app()
-
+    settings = get_settings()
+    hasher = get_hasher()
     app.dependency_overrides[get_db] = lambda: session
     app.dependency_overrides[get_uow] = lambda: UnitOfWork(session)
+    app.state.settings = settings
+    app.state.hasher = hasher
+    app.state.token = get_token_svc(settings)
     async with AsyncClient(
         transport=ASGITransport(app), base_url="http://test"
     ) as client:

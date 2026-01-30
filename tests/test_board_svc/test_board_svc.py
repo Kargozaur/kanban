@@ -8,10 +8,10 @@ import pytest
         ("Mobile app board", "", 201),
     ],
 )
-def test_board_creation(
+async def test_board_creation(
     board_name, description, status_code, auth_client
 ):
-    result = auth_client.post(
+    result = await auth_client.post(
         "/api/v1/board/",
         json={
             "name": board_name,
@@ -33,10 +33,10 @@ def test_board_creation(
         (None, "", 422),
     ],
 )
-def test_board_creation_fail(
+async def test_board_creation_fail(
     board_name, description, status_code, auth_client
 ):
-    result = auth_client.post(
+    result = await auth_client.post(
         "/api/v1/board/",
         json={
             "name": board_name,
@@ -47,71 +47,71 @@ def test_board_creation_fail(
     assert result.status_code == status_code
 
 
-def test_get_board(auth_client):
-    auth_client.post(
+async def test_get_board(auth_client):
+    await auth_client.post(
         "/api/v1/board/",
         json={
             "name": "Test board",
             "description": "Some description in here",
         },
     )
-    result = auth_client.get("/api/v1/board/all")
+    result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     assert result.status_code == 200
     assert len(data) > 0
 
 
-def test_unathoreized_get(unathorized_client, auth_client):
-    auth_client.post(
+async def test_unathoreized_get(unathorized_client, auth_client):
+    await auth_client.post(
         "/api/v1/board/",
         json={
             "name": "Test board",
             "description": "Some description in here",
         },
     )
-    result = auth_client.get("/api/v1/board/all")
+    result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     id = data[0]["id"]
-    response = unathorized_client.get(f"/api/v1/board/{id}")
+    response = await unathorized_client.get(f"/api/v1/board/{id}")
     assert response.status_code == 401
 
 
-def test_board_without_creation(auth_client):
-    result = auth_client.get("/api/v1/board/all")
+async def test_board_without_creation(auth_client):
+    result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     assert result.status_code == 200
     assert len(data) == 0
 
 
-def test_get_single_board(auth_client):
-    auth_client.post(
+async def test_get_single_board(auth_client):
+    await auth_client.post(
         "/api/v1/board/",
         json={
             "name": "Test board",
             "description": "Some description in here",
         },
     )
-    result = auth_client.get("/api/v1/board/all")
+    result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     id = data[0]["id"]
-    single_record = auth_client.get(f"/api/v1/board/{id}")
+    single_record = await auth_client.get(f"/api/v1/board/{id}")
     data = single_record.json()
     assert single_record.status_code == 200
     assert len(data) > 0
 
 
-def test_update_board(auth_client):
-    auth_client.post(
+async def test_update_board(auth_client):
+    await auth_client.post(
         "/api/v1/board/",
         json={
             "name": "Test board",
             "description": "Some description in here",
         },
     )
-    result = auth_client.get("/api/v1/board/all")
+    result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     board_id = data[0]["id"]
-    update = auth_client.patch(
+    update = await auth_client.patch(
         f"/api/v1/board/{board_id}", json={"name": " New name"}
     )
     data = update.json()
@@ -119,28 +119,28 @@ def test_update_board(auth_client):
     assert data["id"] == board_id
 
 
-def test_update_board_fail(auth_client):
-    update = auth_client.patch(
+async def test_update_board_fail(auth_client):
+    update = await auth_client.patch(
         "/api/v1/board/10000", json={"name": " New name"}
     )
     assert update.status_code == 404
 
 
-def test_delete_board(auth_client):
-    auth_client.post(
+async def test_delete_board(auth_client):
+    await auth_client.post(
         "/api/v1/board/",
         json={
             "name": "Test board",
             "description": "Some description in here",
         },
     )
-    result = auth_client.get("/api/v1/board/all")
+    result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     board_id = data[0]["id"]
-    delete = auth_client.delete(f"/api/v1/board/{board_id}")
+    delete = await auth_client.delete(f"/api/v1/board/{board_id}")
     assert delete.status_code == 204
 
 
-def test_board_delete_fail(auth_client):
-    delete = auth_client.delete("/api/v1/board/10000")
+async def test_board_delete_fail(auth_client):
+    delete = await auth_client.delete("/api/v1/board/10000")
     assert delete.status_code == 404
