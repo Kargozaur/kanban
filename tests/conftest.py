@@ -1,61 +1,83 @@
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
+import asyncio
+from httpx import AsyncClient, ASGITransport
 from tests.db import AsyncSessionTest
 from backend.main import create_app
 from backend.database.session_provider import get_db
+from backend.database.uow_provider import get_uow
 from backend.models.models import Base
 from tests.db import test_engine
 import uuid
-from typing import Generator
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession
+from backend.database.unit_of_work import UnitOfWork
+from backend.core.security.password_hasher import get_hasher
+from backend.core.settings.settings import get_settings
+from backend.core.security.token_svc import get_token_svc
 
 
-async def override_get_db():
-    async with AsyncSessionTest() as session:
-        yield session
-        await session.rollback()
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope="session", autouse=True)
-def create_tables():
-    import asyncio
-
-    async def _create():
-        async with test_engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-    async def _drop():
-        async with test_engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-
-    asyncio.run(_create())
+async def create_tables():
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
-    asyncio.run(_drop())
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture
-def client() -> Generator[FastAPI]:
-    app = create_app()
-    app.dependency_overrides[get_db] = override_get_db
+async def session() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionTest() as session:
+        yield session
+        async with test_engine.begin() as conn:
+            for table in reversed(Base.metadata.sorted_tables):
+                await conn.execute(table.delete())
 
-    with TestClient(app) as client:
+
+@pytest.fixture
+async def client(
+    session: AsyncSession,
+) -> AsyncGenerator[AsyncClient, None]:
+    app = create_app()
+    settings = get_settings()
+    hasher = get_hasher()
+    app.state.settings = settings
+    app.state.hasher = hasher
+    app.state.token = get_token_svc(settings)
+    app.dependency_overrides[get_db] = lambda: session
+    app.dependency_overrides[get_uow] = lambda: UnitOfWork(session)
+    async with AsyncClient(
+        transport=ASGITransport(app),
+        base_url="http://test",
+        follow_redirects=True,
+    ) as client:
         yield client
 
 
 @pytest.fixture
-def unathorized_client() -> Generator[FastAPI]:
+async def unathorized_client() -> AsyncGenerator[AsyncClient, None]:
     app = create_app()
-    app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as client:
+    app.dependency_overrides[get_db] = lambda: session
+    app.dependency_overrides[get_uow] = lambda: UnitOfWork(session)
+    async with AsyncClient(
+        transport=ASGITransport(app), base_url="http://test"
+    ) as client:
         yield client
 
 
 @pytest.fixture
-def auth_client(client):
+async def auth_client(client):
     email = f"user_{uuid.uuid4().hex}@example.com"
     password = "SuperPassword!23"
-    resp = client.post(
+    resp = await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
@@ -64,13 +86,15 @@ def auth_client(client):
     )
 
     assert resp.status_code in (200, 201)
-    login = client.post(
+    login = await client.post(
         "/api/v1/auth/login",
         data={
             "username": email,
             "password": password,
         },
     )
+    token = login.json()["access_token"]
+    client.headers.update({"Authorization": f"Bearer {token}"})
     assert login.status_code == 201
 
     return client

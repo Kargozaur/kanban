@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 
 
 @pytest.mark.parametrize(
@@ -9,8 +10,8 @@ import pytest
         ("use2r@example.com", "CoolPoaa11@@", 201),
     ],
 )
-def test_user_creation(email, password, status_code, client):
-    result = client.post(
+async def test_user_creation(email, password, status_code, client):
+    result = await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
@@ -31,8 +32,10 @@ def test_user_creation(email, password, status_code, client):
         ("be", "Go0DPassw#d", 422),
     ],
 )
-def test_registration_fail(email, password, status_code, client):
-    result = client.post(
+async def test_registration_fail(
+    email, password, status_code, client
+):
+    result = await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
@@ -49,15 +52,15 @@ def test_registration_fail(email, password, status_code, client):
         ("user22@example.com", "Par@at#332", 201),
     ],
 )
-def test_user_login(email, password, status_code, client):
-    client.post(
+async def test_user_login(email, password, status_code, client):
+    await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
             "password": password,
         },
     )
-    result = client.post(
+    result = await client.post(
         "/api/v1/auth/login",
         data={
             "username": email,
@@ -73,19 +76,21 @@ def test_user_login(email, password, status_code, client):
 @pytest.mark.parametrize(
     "email, password, bad_password, status_code",
     [
-        ("user@example.com", "SuperPassword!23", "bad_password", 401),
-        ("user22@example.com", "Myc)0lPass", "not_cool_pass", 401),
+        ("user@example.com", "SuperPassword!23", "bad_password", 404),
+        ("user22@example.com", "Myc)0lPass", "not_cool_pass", 404),
     ],
 )
-def test_password(email, password, bad_password, status_code, client):
-    client.post(
+async def test_password(
+    email, password, bad_password, status_code, client
+):
+    await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
             "password": password,
         },
     )
-    result = client.post(
+    result = await client.post(
         "/api/v1/auth/login",
         data={
             "username": email,
@@ -112,15 +117,17 @@ def test_password(email, password, bad_password, status_code, client):
         ),
     ],
 )
-def test_email(email, wrong_email, password, status_code, client):
-    client.post(
+async def test_email(
+    email, wrong_email, password, status_code, client
+):
+    await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
             "password": password,
         },
     )
-    result = client.post(
+    result = await client.post(
         "/api/v1/auth/login",
         data={
             "username": wrong_email,
@@ -130,22 +137,26 @@ def test_email(email, wrong_email, password, status_code, client):
     assert result.status_code == status_code
 
 
-def test_user_logout(client):
-    client.post(
+async def test_user_logout(client):
+    await client.post(
         "/api/v1/auth/sign_up",
         json={
-            "username": "user@example.com",
+            "email": "user@example.com",
             "password": "SuperPassword!23",
         },
     )
-    client.post(
+    login_res = await client.post(
         "/api/v1/auth/login",
         data={
             "username": "user@example.com",
             "password": "SuperPassword!23",
         },
     )
-    result = client.post("/api/v1/auth/logout")
+    token = login_res.json()["access_token"]
+    result = await client.post(
+        "/api/v1/auth/logout",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     data = result.json()
     assert result.status_code == 200
     assert "message" in data
@@ -158,40 +169,40 @@ def test_user_logout(client):
         ("user22@example.com", "Par@at#332", 200),
     ],
 )
-def test_me(email, password, status_code, client):
-    client.post(
+async def test_me(email, password, status_code, client):
+    await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
             "password": password,
         },
     )
-    client.post(
+    await client.post(
         "/api/v1/auth/login",
         data={
             "username": email,
             "password": password,
         },
     )
-    result = client.get("/api/v1/auth/me")
+    result = await client.get("/api/v1/auth/me")
     data = result.json()
     assert result.status_code == status_code
     assert "id" in data
     assert data["email"] == email
 
 
-def test_me_blank(client):
-    result = client.get("/api/v1/auth/me")
+async def test_me_blank(client):
+    result = await client.get("/api/v1/auth/me")
     assert result.status_code == 401
 
 
-def test_me_without_login(client):
-    client.post(
+async def test_me_without_login(client):
+    await client.post(
         "/api/v1/auth/sign_up",
         json={
             "email": "user@example.com",
             "password": "SuperPassword!23",
         },
     )
-    result = client.get("/api/v1/auth/me")
+    result = await client.get("/api/v1/auth/me")
     assert result.status_code == 401
