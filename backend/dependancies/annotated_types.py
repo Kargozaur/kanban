@@ -1,6 +1,7 @@
 from typing import Annotated
 from typing_extensions import Doc
 from fastapi import Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from backend.dependancies.states import (
     get_hasher,
     get_token_svc,
@@ -60,4 +61,9 @@ BoardRepoDep = Annotated[
     Doc(
         "Dependancy of the Board repository for the BoardService. Depends on DBDep"
     ),
+]
+FormData = Annotated[
+    OAuth2PasswordRequestForm,
+    Depends(),
+    Doc("Dependayc for the SwaggerUI login"),
 ]
