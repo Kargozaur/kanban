@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Response, Request
 from typing import Annotated
 from backend.dependancies.user_dep import get_user_service
 from backend.dependancies.auth_dep import CurrentUserDep
+from backend.dependancies.annotated_types import FormData
 from backend.services.services.user_service import UserService
 from backend.schemas.user_schema import (
     UserCredentials,
@@ -31,17 +32,21 @@ async def sign_up(
 @user_auth_router.post(
     "/login",
     status_code=201,
-    description="Compares user credentials. If credentials right, returns a JWT token",
+    description="Compares user credentials. If credentials right, returns a JWT token. \n"
+    "Username field expects users email.",
 )
 async def login(
     request: Request,
     response: Response,
-    user_credentials: UserLogin,
     user_svc: UserSvcDep,
+    form_data: FormData,
 ):
     existing_token = request.cookies.get("access_token")
     if existing_token:
         return {"message": "You are already logged in"}
+    user_credentials = UserLogin(
+        email=form_data.username, password=form_data.password
+    )
     token = await user_svc.login_user(user_credentials)
     response.set_cookie(
         key="access_token",
