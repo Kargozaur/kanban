@@ -25,3 +25,8 @@ class PermissionError(AppBaseException):
     status_code = 401
     detail = "You are not authorized to perform this action"
     headers = {"WWW-Authenticate": "Bearer"}
+
+
+class UserAlreadyExists(AppBaseException):
+    status_code = 409
+    detail = "User with this email already exists"

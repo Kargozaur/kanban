@@ -6,6 +6,7 @@ from backend.core.exceptions.exceptions import (
     NotFoundError,
     TokenError,
     PermissionError,
+    UserAlreadyExists,
 )
 import logging
 
@@ -56,6 +57,14 @@ def user_exception_handler(app: FastAPI):
     async def permission_exception(
         request: Request, exc: PermissionError
     ):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=exc.headers,
+        )
+
+    @app.exception_handler(UserAlreadyExists)
+    async def already_exists(request, exc: UserAlreadyExists):
         return JSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},

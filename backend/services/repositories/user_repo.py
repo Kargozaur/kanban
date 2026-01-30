@@ -46,27 +46,17 @@ class UserRepository:
         )
         logger.info(f"DEBUG - check_user = {check_user}")
         if check_user is True:
-            return {
-                "result": False,
-                "reason": "email already exists",
-            }
+            return None
         logging.info(f"Email received in the repo: {user_data.email}")
         from_orm_user = User(
             email=user_data.email,
             name=user_data.name,
             password=user_data.password,
         )
-        try:
-            self.session.add(from_orm_user)
-            await self.session.flush()
-            await self.session.commit()
-            return {"result": True}
-        except Exception as exc:
-            await self.session.rollback()
-            logging.exception(
-                f"Exception occured for the {user_data.email}"
-            )
-            return {"result": False, "reason": str(exc)}
+
+        self.session.add(from_orm_user)
+        await self.session.flush()
+        return from_orm_user
 
     async def get_user_data(self, email: str):
         query = self._get_user_by_email_helper(email)

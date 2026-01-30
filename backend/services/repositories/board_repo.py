@@ -45,21 +45,18 @@ class BoardRepository:
             name=board_data.name,
             description=board_data.description,
         )
-        try:
-            self.session.add(orm_board)
-            await self.session.flush()
-            owner_membership = BoardMembers(
-                board_id=orm_board.id,
-                user_id=owner_id,
-                role=RoleEnum.ADMIN,
-            )
-            self.session.add(owner_membership)
-            await self.session.commit()
-            await self.session.refresh(orm_board)
-            return orm_board
-        except Exception as exc:
-            await self.session.rollback()
-            raise exc
+
+        self.session.add(orm_board)
+        await self.session.flush()
+        owner_membership = BoardMembers(
+            board_id=orm_board.id,
+            user_id=owner_id,
+            role=RoleEnum.ADMIN,
+        )
+        self.session.add(owner_membership)
+        await self.session.commit()
+        await self.session.refresh(orm_board)
+        return orm_board
 
     async def get_boards(self, user_id: UUID, pagination: Pagination):
         """
@@ -126,14 +123,8 @@ class BoardRepository:
         for k, v in to_update.items():
             setattr(board, k, v)
 
-        try:
-            await self.session.commit()
-            await self.session.refresh(board)
-            return board
-
-        except Exception as exc:
-            await self.session.rollback()
-            raise exc
+        await self.session.refresh(board)
+        return board
 
     async def delete_board(self, id: int):
         """
@@ -154,13 +145,10 @@ class BoardRepository:
                 "result": False,
                 "detail": "Board not found or permission denied",
             }
-        try:
+
             await self.session.delete(board)
             await self.session.commit()
             return {
                 "result": True,
                 "detail": f"Board with the {id} succesfully deleted",
             }
-        except Exception as exc:
-            await self.session.rollback()
-            raise exc
