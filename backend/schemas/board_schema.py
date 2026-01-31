@@ -44,8 +44,8 @@ class BoardGet(BoardGetBase):
 
 
 class BoardUpdate(BaseModel):
-    name: Annotated[Optional[str], Field(..., min_length=8)] = None
-    description: Annotated[Optional[str], Field(default=None)] = None
+    name: Annotated[Optional[str], Field(default=None, min_length=8)]
+    description: Annotated[Optional[str], Field(default=None)]
 
 
 class MemberView(BaseModel):
@@ -80,7 +80,11 @@ class BoardFullView(BaseModel):
     owner_id: UUID
     created_at: datetime
 
-    board_members: list[MemberView] = Field(default_factory=list)
-    columns: list[ColumnBoardView] = Field(default_factory=list)
+    board_members: Annotated[
+        list[MemberView], Field(default_factory=list)
+    ]
+    columns: Annotated[
+        list[ColumnBoardView], Field(default_factory=list)
+    ]
 
     model_config = ConfigDict(from_attributes=True)

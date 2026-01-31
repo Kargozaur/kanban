@@ -22,9 +22,15 @@ PasswordField = Annotated[
 
 
 class UserCredentials(BaseModel):
-    email: EmailStr = Field(..., examples=["user@example.com"])
-    password: PasswordField = Field(examples=["SuperPassword!123"])
-    name: Optional[str] = Field(default=None, examples=["User Name"])
+    email: Annotated[
+        EmailStr, Field(..., examples=["user@example.com"])
+    ]
+    password: Annotated[
+        PasswordField, Field(examples=["SuperPassword!123"])
+    ]
+    name: Annotated[
+        Optional[str], Field(default=None, examples=["User Name"])
+    ]
 
     """validator in case if user didn't set their name"""
 
@@ -40,8 +46,10 @@ class UserCredentials(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: str = Field(..., examples=["user@example.com"])
-    password: str = Field(..., examples=["SuperPassword!123"])
+    email: Annotated[str, Field(..., examples=["user@example.com"])]
+    password: Annotated[
+        str, Field(..., examples=["SuperPassword!123"])
+    ]
 
 
 class UserGet(BaseModel):
