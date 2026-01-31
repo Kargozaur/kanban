@@ -65,5 +65,5 @@ BoardRepoDep = Annotated[
 FormData = Annotated[
     OAuth2PasswordRequestForm,
     Depends(),
-    Doc("Dependayc for the SwaggerUI login"),
+    Doc("Dependancy for the SwaggerUI login"),
 ]

@@ -5,9 +5,6 @@ from uuid import UUID
 
 
 class AddBoardMemberBase(BaseModel):
-    board_id: Annotated[
-        int, Field(gt=0, description="Id of the current board")
-    ]
     role: Annotated[
         RoleEnum,
         Field(
