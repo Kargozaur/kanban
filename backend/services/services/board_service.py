@@ -1,4 +1,5 @@
 from backend.core.decorators.transactional import transactional
+from backend.core.decorators.read_only import read_only
 from backend.database.unit_of_work import UnitOfWork
 from backend.schemas.pagination_schema import Pagination
 from backend.schemas.board_schema import (
@@ -12,12 +13,28 @@ from backend.core.exceptions.board_exceptions import (
     BoardNotFound,
     BoardPermissionDenied,
 )
+from backend.core.exceptions.members_exceptions import (
+    MemberAlreadyPersists,
+    EmailDoesNotExists,
+    MemberNotFound,
+)
+from backend.schemas.member_schema import (
+    AddBoardMemberEmail,
+    AddBoardMemberUUID,
+    UpdateBoardMember,
+)
 from uuid import UUID
 
 
 class BoardService:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
+
+    async def _get_user(self, email: str):
+        user = await self.uow.users.get_user_by_email(email=email)
+        if not user:
+            raise EmailDoesNotExists(f"{email} does not exists")
+        return user.id
 
     @transactional
     async def create_board(
@@ -30,14 +47,14 @@ class BoardService:
             raise BoardBaseException("Could not create a board")
         return BoardGet.model_validate(result)
 
-    @transactional
+    @read_only
     async def get_boards(self, user_id: UUID, pagination: Pagination):
         result = await self.uow.boards.get_boards(
             user_id=user_id, pagination=pagination
         )
         return [BoardGet.model_validate(values) for values in result]
 
-    @transactional
+    @read_only
     async def get_board(self, user_id: UUID, id: int):
         result = await self.uow.boards.get_board(
             user_id=user_id, id=id
@@ -68,3 +85,53 @@ class BoardService:
         if not result:
             raise BoardPermissionDenied(result["detail"])
         return f"Board {id} was succesfully deleted"
+
+    @transactional
+    async def add_member_to_the_board(
+        self, board_id: int, user_data: AddBoardMemberEmail
+    ):
+        user = await self._get_user(email=user_data.user_email)
+        new_member = AddBoardMemberUUID(
+            board_id=board_id, role=user_data.role, user_id=user
+        )
+        result = await self.uow.member.add_member(
+            new_user_data=new_member
+        )
+        if not result:
+            raise MemberAlreadyPersists(
+                f"User with the {new_member.user_id} already persists in the board"
+            )
+        return {
+            "message": f"succesfully added user with the email {user_data.email}"
+        }
+
+    @transactional
+    async def update_user_role(
+        self, board_id: int, user_email: str, role: UpdateBoardMember
+    ):
+        user = await self._get_user(email=user_email)
+        new_user_role = await self.uow.member.update_member_role(
+            board_id=board_id, user_id=user, new_role=role
+        )
+        if not new_user_role:
+            raise MemberNotFound(
+                f"Member with the id {user} is not found in the board"
+            )
+
+        return {"message": "Succesfully updated user role"}
+
+    @transactional
+    async def delete_user_from_the_board(
+        self, board_id: int, user_email: str
+    ):
+        user = await self._get_user(user_email)
+        delete_user = (
+            await self.uow.member.delete_member_from_the_board(
+                board_id=board_id, user_id=user
+            )
+        )
+        if not delete_user:
+            raise MemberNotFound(
+                f"Member with the id {user} is not found in the board"
+            )
+        return {"message": "Succesfully deleted user from the board"}
