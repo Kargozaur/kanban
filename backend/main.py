@@ -20,6 +20,9 @@ from backend.exceptions_handlers.pydantic_handler import (
 from backend.exceptions_handlers.user_handler import (
     user_exception_handler,
 )
+from backend.exceptions_handlers.member_exception_handler import (
+    member_exception_handler,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -40,7 +43,7 @@ def create_app() -> FastAPI:
     board_exceptions_handler(app)
     pydantic_exceptions_handler(app)
     user_exception_handler(app)
-
+    member_exception_handler(app)
     app.include_router(api_router)
 
     @app.get("/")
