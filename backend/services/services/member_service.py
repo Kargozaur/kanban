@@ -11,6 +11,7 @@ from backend.schemas.member_schema import (
 )
 from backend.core.exceptions.members_exceptions import (
     MemberNotFound,
+    SecondAdmin,
 )
 from uuid import UUID
 
@@ -46,9 +47,9 @@ class MemberService:
                 f"User with the {new_member.user_id} already persists in the board"
             )
         if result == "conflict":
-            return {
-                "message": "You can not add another admin for the board"
-            }
+            raise SecondAdmin(
+                "You can not add another admin to the board"
+            )
         return {
             "message": f"succesfully added user with the email {user_data.email}"
         }
@@ -70,7 +71,9 @@ class MemberService:
                 f"Member with the id {user} is not found in the board"
             )
         if result == "conflict":
-            return {"message": "You can not set user role as admin"}
+            raise SecondAdmin(
+                "You can not add another admin to the board"
+            )
         return {
             "message": f"Succesfully updated user role for the user {user_data.email}"
         }

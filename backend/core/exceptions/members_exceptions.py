@@ -32,3 +32,11 @@ class MemberNotFound(MemberBaseException):
 
     def __init__(self, message: str) -> None:
         super().__init__(message)
+
+
+class SecondAdmin(MemberBaseException):
+    status_code = 409
+    detail = "You can not add another user with the admin role"
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)

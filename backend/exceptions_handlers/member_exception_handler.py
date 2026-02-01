@@ -5,6 +5,7 @@ from backend.core.exceptions.members_exceptions import (
     MemberBaseException,
     MemberNotFound,
     EmailDoesNotExists,
+    SecondAdmin,
 )
 
 
@@ -40,6 +41,13 @@ def member_exception_handler(app: FastAPI):
     async def email_does_not_exists_error(
         request: Request, exc: EmailDoesNotExists
     ):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+
+    @app.exception_handler(SecondAdmin)
+    async def second_admin_error(request: Request, exc: SecondAdmin):
         return JSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
