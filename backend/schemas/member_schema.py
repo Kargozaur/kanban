@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from backend.core.utility.role_enum import RoleEnum
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID
 
 
@@ -38,8 +38,9 @@ class AddBoardMemberUUID(AddBoardMemberBase):
 
 
 class UpdateBoardMember(BaseModel):
+    email: str
     role: Annotated[
-        Optional[RoleEnum],
+        RoleEnum,
         Field(
             default=RoleEnum.VIEWER,
             description="Changes the role of the user inside the board",

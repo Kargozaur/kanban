@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, Body
 from backend.core.utility.role_enum import RoleEnum
 from backend.services.services.board_service import BoardService
 from backend.dependancies.board_svc_dep import get_board_svc
@@ -114,12 +114,11 @@ async def add_member(
 )
 async def update_role(
     board_id: int,
-    email: str,
     update_member: UpdateBoardMember,
     member_svc: MemberSvcDep,
 ):
     return await member_svc.update_user_role(
-        board_id=board_id, user_email=email, role=update_member
+        board_id=board_id, user_data=update_member
     )
 
 

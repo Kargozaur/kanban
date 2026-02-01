@@ -55,13 +55,15 @@ class MemberService:
 
     @transactional
     async def update_user_role(
-        self, board_id: int, user_email: str, role: UpdateBoardMember
+        self, board_id: int, user_data: UpdateBoardMember
     ) -> dict[str, str]:
-        user = await self._get_user(email=user_email)
+        user = await self._get_user(email=user_data.email)
 
         if not (
             result := await self.uow.member.update_member_role(
-                board_id=board_id, user_id=user, new_role=role
+                board_id=board_id,
+                user_id=user,
+                new_role=user_data.role,
             )
         ):
             raise MemberNotFound(
@@ -70,7 +72,7 @@ class MemberService:
         if result == "conflict":
             return {"message": "You can not set user role as admin"}
         return {
-            "message": f"Succesfully updated user role for the user {user_email}"
+            "message": f"Succesfully updated user role for the user {user_data.email}"
         }
 
     @transactional

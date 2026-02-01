@@ -4,7 +4,6 @@ from backend.models.models import BoardMembers
 from backend.core.utility.role_enum import RoleEnum
 from backend.schemas.member_schema import (
     AddBoardMemberUUID,
-    UpdateBoardMember,
 )
 from uuid import UUID
 
@@ -92,7 +91,7 @@ class MemberRepo:
         self,
         board_id: int,
         user_id: UUID,
-        new_role: UpdateBoardMember,
+        new_role: str,
     ) -> bool | str:
         """
         Updates user role by the admin. If admin tries to assign another admin \n
@@ -111,11 +110,9 @@ class MemberRepo:
             )
         ):
             return False
-        if new_role.role == RoleEnum.ADMIN:
+        if new_role == RoleEnum.ADMIN:
             return "conflict"
-        users_new_role = new_role.model_dump()
-        for k, v in users_new_role.items():
-            setattr(existing_user, k, v)
+        existing_user.role = new_role
         await self.session.flush()
         return True
 
