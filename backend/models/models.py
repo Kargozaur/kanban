@@ -70,7 +70,6 @@ class BoardMembers(Base):
 
     board_id: Mapped[int] = mapped_column(
         ForeignKey("boards.id", ondelete="CASCADE"),
-        unique=True,
         index=True,
         primary_key=True,
     )

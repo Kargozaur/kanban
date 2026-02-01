@@ -10,6 +10,10 @@ from backend.schemas.board_schema import (
     BoardGet,
     BoardUpdate,
 )
+from backend.schemas.member_schema import (
+    AddBoardMemberEmail,
+    UpdateBoardMember,
+)
 from typing import Annotated
 
 BoardSvcDep = Annotated[BoardService, Depends(get_board_svc)]
@@ -83,3 +87,47 @@ async def update_board(
 async def delete_board(board_id: int, board_svc: BoardSvcDep):
     await board_svc.delete_board(board_id)
     return Response(status_code=204)
+
+
+@board_router.post(
+    "/{board_id}/members/add",
+    dependencies=[PermissionDep([RoleEnum.ADMIN])],
+    status_code=201,
+)
+async def add_member(
+    board_id: int,
+    user_data: AddBoardMemberEmail,
+    board_svc: BoardSvcDep,
+):
+    return await board_svc.add_member_to_the_board(
+        board_id=board_id, user_data=user_data
+    )
+
+
+@board_router.patch(
+    "/{board_id}/members/update",
+    dependencies=[PermissionDep([RoleEnum.ADMIN])],
+    status_code=200,
+)
+async def update_role(
+    board_id: int,
+    email: str,
+    update_member: UpdateBoardMember,
+    board_svc: BoardSvcDep,
+):
+    return await board_svc.update_user_role(
+        board_id=board_id, user_email=email, role=update_member
+    )
+
+
+@board_router.delete(
+    "/{board_id}/members/delete_member",
+    dependencies=[PermissionDep([RoleEnum.ADMIN])],
+    status_code=204,
+)
+async def delete_user(
+    board_id: int, email: str, board_svc: BoardSvcDep
+):
+    await board_svc.delete_user_from_the_board(
+        board_id=board_id, user_email=email
+    )

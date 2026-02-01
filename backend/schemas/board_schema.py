@@ -49,7 +49,6 @@ class BoardUpdate(BaseModel):
 
 
 class MemberView(BaseModel):
-    user_id: UUID
     role: RoleEnum
     user: UserGet
 

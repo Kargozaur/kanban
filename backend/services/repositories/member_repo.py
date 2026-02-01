@@ -60,15 +60,15 @@ class MemberRepo:
         return result.scalar_one_or_none()
 
     async def add_member(
-        self, new_user_data: AddBoardMemberUUID
+        self, board_id: int, new_user_data: AddBoardMemberUUID
     ) -> bool:
         if await self._existing_user(
-            board_id=new_user_data.board_id,
+            board_id=board_id,
             user_id=new_user_data.user_id,
         ):
             return False
         new_member = BoardMembers(
-            board_id=new_user_data.board_id,
+            board_id=board_id,
             user_id=new_user_data.user_id,
             role=new_user_data.role,
         )

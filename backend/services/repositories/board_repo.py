@@ -22,7 +22,13 @@ class BoardRepository:
     def _select_query_builder(
         self, user_id: UUID, id: int | None = None
     ) -> Select[tuple[Boards]]:
-        query = select(Boards).where(Boards.owner_id == user_id)
+        query = (
+            select(Boards)
+            .join(
+                Boards.board_members,
+            )
+            .where(BoardMembers.user_id == user_id)
+        ).distinct()
         if id is not None:
             query = query.where(Boards.id == id)
         return query

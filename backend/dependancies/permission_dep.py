@@ -5,13 +5,15 @@ from backend.dependancies.db_dep import DBDep
 from backend.dependancies.auth_dep import CurrentUserDep
 
 
-def PermissionDep(required_roles: list[RoleEnum]):
+def PermissionDep(required_roles: list[RoleEnum] | RoleEnum):
     """
     Permission Dependancy for the requests, related to the endpoints. \n
     Manages BoardMembers table. Checks the of the user inside the table.
     It is managed inside the router like this : \n
     @router.patch("/", dependancies=[PermissionDep(RoleEnum.ADMIN)])
     """
+    if not isinstance(required_roles, list):
+        required_roles = [required_roles]
 
     async def permission_checker(
         board_id: int, user: CurrentUserDep, session: DBDep

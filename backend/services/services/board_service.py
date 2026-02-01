@@ -101,13 +101,15 @@ class BoardService:
     async def add_member_to_the_board(
         self, board_id: int, user_data: AddBoardMemberEmail
     ) -> dict[str, str]:
-        user = await self._get_user(email=user_data.user_email)
+        user = await self._get_user(email=user_data.email)
         new_member = AddBoardMemberUUID(
-            board_id=board_id, role=user_data.role, user_id=user
+            role=user_data.role, user_id=user
         )
 
         if not (
-            await self.uow.member.add_member(new_user_data=new_member)
+            await self.uow.member.add_member(
+                board_id=board_id, new_user_data=new_member
+            )
         ):
             raise MemberAlreadyPersists(
                 f"User with the {new_member.user_id} already persists in the board"
@@ -132,7 +134,7 @@ class BoardService:
             )
 
         return {
-            "message": f"Succesfully updated user role with the role {new_user_role}"
+            "message": f"Succesfully updated user role for the user {user_email}"
         }
 
     @transactional
@@ -147,6 +149,6 @@ class BoardService:
             )
         ):
             raise MemberNotFound(
-                f"Member with the id {user} is not found in the board"
+                f"Member with the id {user_email} is not found in the board"
             )
         return {"message": "Succesfully deleted user from the board"}

@@ -22,7 +22,7 @@ class AddBoardMemberBase(BaseModel):
 
 
 class AddBoardMemberEmail(AddBoardMemberBase):
-    user_email: Annotated[
+    email: Annotated[
         str,
         Field(
             ...,
