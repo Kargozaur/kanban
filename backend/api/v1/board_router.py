@@ -15,7 +15,6 @@ from backend.schemas.board_schema import (
 from backend.schemas.member_schema import (
     AddBoardMemberEmail,
     UpdateBoardMember,
-    EmailBase,
 )
 from typing import Annotated
 
@@ -124,15 +123,15 @@ async def update_role(
 
 
 @board_router.delete(
-    "/{board_id}/members/delete_member",
+    "/{board_id}/members/delete_member/{email}",
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     status_code=204,
 )
 async def delete_user(
     board_id: int,
-    email: EmailBase,
+    email: str,
     member_svc: MemberSvcDep,
 ):
     await member_svc.delete_user_from_the_board(
-        board_id=board_id, user_email=email.email
+        board_id=board_id, user_email=email
     )
