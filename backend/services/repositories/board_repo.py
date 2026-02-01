@@ -106,7 +106,7 @@ class BoardRepository:
 
     async def update_board(
         self, board_id: int, data_to_update: BoardUpdate
-    ) -> Boards:
+    ) -> Sequence[Boards] | None:
         """
         Updates Boards table. User has to have Admin role. Role is managed inside the endpoint
         Args:

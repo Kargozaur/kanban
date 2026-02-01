@@ -24,6 +24,7 @@ from backend.schemas.member_schema import (
     UpdateBoardMember,
 )
 from uuid import UUID
+from typing import Sequence
 
 
 class BoardService:
@@ -54,7 +55,7 @@ class BoardService:
     @read_only
     async def get_boards(
         self, user_id: UUID, pagination: Pagination
-    ) -> list[BoardGet]:
+    ) -> Sequence[BoardGet]:
         result = await self.uow.boards.get_boards(
             user_id=user_id, pagination=pagination
         )
@@ -64,10 +65,11 @@ class BoardService:
     async def get_board(
         self, user_id: UUID, id: int
     ) -> BoardFullView:
-        result = await self.uow.boards.get_board(
-            user_id=user_id, id=id
-        )
-        if not result:
+        if not (
+            result := await self.uow.boards.get_board(
+                user_id=user_id, id=id
+            )
+        ):
             raise BoardNotFound(
                 f"Board with the id {id} is not found"
             )
@@ -77,10 +79,6 @@ class BoardService:
     async def update_board(
         self, board_id: int, data_to_update: BoardUpdate
     ) -> BoardGet:
-        result = await self.uow.boards.update_board(
-            board_id=board_id,
-            data_to_update=data_to_update,
-        )
         if not (
             result := await self.uow.boards.update_board(
                 board_id=board_id,
@@ -102,7 +100,7 @@ class BoardService:
     @transactional
     async def add_member_to_the_board(
         self, board_id: int, user_data: AddBoardMemberEmail
-    ):
+    ) -> dict[str, str]:
         user = await self._get_user(email=user_data.user_email)
         new_member = AddBoardMemberUUID(
             board_id=board_id, role=user_data.role, user_id=user
@@ -140,7 +138,7 @@ class BoardService:
     @transactional
     async def delete_user_from_the_board(
         self, board_id: int, user_email: str
-    ):
+    ) -> dict[str, str]:
         user = await self._get_user(user_email)
 
         if not (
