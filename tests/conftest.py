@@ -42,46 +42,37 @@ async def session() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest.fixture
-async def client(
-    session: AsyncSession,
-) -> AsyncGenerator[AsyncClient, None]:
-    app = create_app()
-    settings = get_settings()
-    hasher = get_hasher()
-    app.state.settings = settings
-    app.state.hasher = hasher
-    app.state.token = get_token_svc(settings)
-    app.dependency_overrides[get_db] = lambda: session
-    app.dependency_overrides[get_uow] = lambda: UnitOfWork(session)
+def app_factory(session: AsyncSession):
+    def create_conf_app():
+        app = create_app()
+        settings = get_settings()
+        hasher = get_hasher()
+        app.state.settings = settings
+        app.state.hasher = hasher
+        app.state.token = get_token_svc(settings)
+        app.dependency_overrides[get_db] = lambda: session
+        app.dependency_overrides[get_uow] = lambda: UnitOfWork(
+            session
+        )
+        return app
+
+    return create_conf_app
+
+
+@pytest.fixture
+async def client(app_factory) -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
-        transport=ASGITransport(app),
+        transport=ASGITransport(app_factory()),
         base_url="http://test",
         follow_redirects=True,
     ) as client:
         yield client
 
 
-@pytest.fixture
-async def unathorized_client() -> AsyncGenerator[AsyncClient, None]:
-    app = create_app()
-    settings = get_settings()
-    hasher = get_hasher()
-    app.dependency_overrides[get_db] = lambda: session
-    app.dependency_overrides[get_uow] = lambda: UnitOfWork(session)
-    app.state.settings = settings
-    app.state.hasher = hasher
-    app.state.token = get_token_svc(settings)
-    async with AsyncClient(
-        transport=ASGITransport(app), base_url="http://test"
-    ) as client:
-        yield client
-
-
-@pytest.fixture
-async def auth_client(client):
+async def register_and_login(client_instance: AsyncClient):
     email = f"user_{uuid.uuid4().hex}@example.com"
     password = "SuperPassword!23"
-    resp = await client.post(
+    resp = await client_instance.post(
         "/api/v1/auth/sign_up",
         json={
             "email": email,
@@ -90,7 +81,7 @@ async def auth_client(client):
     )
 
     assert resp.status_code in (200, 201)
-    login = await client.post(
+    login = await client_instance.post(
         "/api/v1/auth/login",
         data={
             "username": email,
@@ -98,7 +89,28 @@ async def auth_client(client):
         },
     )
     token = login.json()["access_token"]
-    client.headers.update({"Authorization": f"Bearer {token}"})
+    client_instance.headers.update(
+        {"Authorization": f"Bearer {token}"}
+    )
     assert login.status_code == 201
+    return client_instance
 
-    return client
+
+@pytest.fixture
+async def auth_client(app_factory):
+    async with AsyncClient(
+        transport=ASGITransport(app_factory()),
+        base_url="http://test",
+        follow_redirects=True,
+    ) as client:
+        yield await register_and_login(client)
+
+
+@pytest.fixture
+async def second_auth_client(app_factory):
+    async with AsyncClient(
+        transport=ASGITransport(app_factory()),
+        base_url="http://test",
+        follow_redirects=True,
+    ) as client:
+        yield await register_and_login(client)
