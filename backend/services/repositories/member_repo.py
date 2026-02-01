@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, Select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.models.models import BoardMembers
 from backend.schemas.member_schema import (
@@ -12,15 +12,37 @@ class MemberRepo:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    def _query_builder(self, board_id: int, user_id: UUID):
+    def _query_builder(
+        self, board_id: int, user_id: UUID
+    ) -> Select[tuple(BoardMembers)]:
         return select(BoardMembers).where(
             BoardMembers.user_id == user_id,
             BoardMembers.board_id == board_id,
         )
 
+    def _membership_record_builder(
+        self, board_id: int, user_id: UUID
+    ) -> Select:
+        return select(
+            exists().where(
+                BoardMembers.board_id == board_id,
+                BoardMembers.user_id == user_id,
+            )
+        )
+
+    async def _existing_user(
+        self, board_id: int, user_id: UUID
+    ) -> bool:
+        result = await self.session.execute(
+            self._membership_record_builder(
+                board_id=board_id, user_id=user_id
+            )
+        )
+        return bool(result.scalar())
+
     async def _get_membership_record(
         self, board_id: int, user_id: UUID
-    ):
+    ) -> BoardMembers | None:
         """Method for general use inside the repository.
         Checks if member exists inside the requested board
 
@@ -37,12 +59,13 @@ class MemberRepo:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def add_member(self, new_user_data: AddBoardMemberUUID):
-        check_if_user_exists = await self._get_membership_record(
+    async def add_member(
+        self, new_user_data: AddBoardMemberUUID
+    ) -> bool:
+        if await self._existing_user(
             board_id=new_user_data.board_id,
             user_id=new_user_data.user_id,
-        )
-        if check_if_user_exists:
+        ):
             return False
         new_member = BoardMembers(
             board_id=new_user_data.board_id,
@@ -57,11 +80,12 @@ class MemberRepo:
         board_id: int,
         user_id: UUID,
         new_role: UpdateBoardMember,
-    ):
-        existing_user = await self._get_membership_record(
-            board_id=board_id, user_id=user_id
-        )
-        if not existing_user:
+    ) -> bool:
+        if not (
+            existing_user := await self._get_membership_record(
+                board_id=board_id, user_id=user_id
+            )
+        ):
             return False
         users_new_role = new_role.model_dump()
         for k, v in users_new_role.items():
@@ -71,11 +95,12 @@ class MemberRepo:
 
     async def delete_member_from_the_board(
         self, board_id: int, user_id: UUID
-    ):
-        existing_user = await self._get_membership_record(
-            board_id=board_id, user_id=user_id
-        )
-        if not existing_user:
+    ) -> bool:
+        if not (
+            existing_user := await self._get_membership_record(
+                board_id=board_id, user_id=user_id
+            )
+        ):
             return False
         await self.session.delete(existing_user)
         await self.session.flush()

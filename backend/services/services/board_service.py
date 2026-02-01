@@ -30,32 +30,40 @@ class BoardService:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
 
-    async def _get_user(self, email: str):
-        user = await self.uow.users.get_user_by_email(email=email)
-        if not user:
+    async def _get_user(self, email: str) -> UUID:
+        if not (
+            user := await self.uow.users.get_user_by_email(
+                email=email
+            )
+        ):
             raise EmailDoesNotExists(f"{email} does not exists")
         return user.id
 
     @transactional
     async def create_board(
         self, owner_id: UUID, board_data: BoardCreate
-    ):
-        result = await self.uow.boards.create_board(
-            owner_id=owner_id, board_data=board_data
-        )
-        if not result:
+    ) -> BoardGet:
+        if not (
+            result := await self.uow.boards.create_board(
+                owner_id=owner_id, board_data=board_data
+            )
+        ):
             raise BoardBaseException("Could not create a board")
         return BoardGet.model_validate(result)
 
     @read_only
-    async def get_boards(self, user_id: UUID, pagination: Pagination):
+    async def get_boards(
+        self, user_id: UUID, pagination: Pagination
+    ) -> list[BoardGet]:
         result = await self.uow.boards.get_boards(
             user_id=user_id, pagination=pagination
         )
         return [BoardGet.model_validate(values) for values in result]
 
     @read_only
-    async def get_board(self, user_id: UUID, id: int):
+    async def get_board(
+        self, user_id: UUID, id: int
+    ) -> BoardFullView:
         result = await self.uow.boards.get_board(
             user_id=user_id, id=id
         )
@@ -68,19 +76,24 @@ class BoardService:
     @transactional
     async def update_board(
         self, board_id: int, data_to_update: BoardUpdate
-    ):
+    ) -> BoardGet:
         result = await self.uow.boards.update_board(
             board_id=board_id,
             data_to_update=data_to_update,
         )
-        if not result:
+        if not (
+            result := await self.uow.boards.update_board(
+                board_id=board_id,
+                data_to_update=data_to_update,
+            )
+        ):
             raise BoardNotFound(
                 f"Coudn't find a board with the id: {board_id}"
             )
         return BoardGet.model_validate(result)
 
     @transactional
-    async def delete_board(self, id: int):
+    async def delete_board(self, id: int) -> str:
         result = await self.uow.boards.delete_board(id)
         if not result:
             raise BoardPermissionDenied(result["detail"])
@@ -94,10 +107,10 @@ class BoardService:
         new_member = AddBoardMemberUUID(
             board_id=board_id, role=user_data.role, user_id=user
         )
-        result = await self.uow.member.add_member(
-            new_user_data=new_member
-        )
-        if not result:
+
+        if not (
+            await self.uow.member.add_member(new_user_data=new_member)
+        ):
             raise MemberAlreadyPersists(
                 f"User with the {new_member.user_id} already persists in the board"
             )
@@ -108,29 +121,33 @@ class BoardService:
     @transactional
     async def update_user_role(
         self, board_id: int, user_email: str, role: UpdateBoardMember
-    ):
+    ) -> dict[str, str]:
         user = await self._get_user(email=user_email)
-        new_user_role = await self.uow.member.update_member_role(
-            board_id=board_id, user_id=user, new_role=role
-        )
-        if not new_user_role:
+
+        if not (
+            new_user_role := await self.uow.member.update_member_role(
+                board_id=board_id, user_id=user, new_role=role
+            )
+        ):
             raise MemberNotFound(
                 f"Member with the id {user} is not found in the board"
             )
 
-        return {"message": "Succesfully updated user role"}
+        return {
+            "message": f"Succesfully updated user role with the role {new_user_role}"
+        }
 
     @transactional
     async def delete_user_from_the_board(
         self, board_id: int, user_email: str
     ):
         user = await self._get_user(user_email)
-        delete_user = (
+
+        if not (
             await self.uow.member.delete_member_from_the_board(
                 board_id=board_id, user_id=user
             )
-        )
-        if not delete_user:
+        ):
             raise MemberNotFound(
                 f"Member with the id {user} is not found in the board"
             )

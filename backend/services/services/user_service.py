@@ -33,7 +33,9 @@ class UserService:
         self.token_service = token_service
 
     @transactional
-    async def create_user(self, user_credential: UserCredentials):
+    async def create_user(
+        self, user_credential: UserCredentials
+    ) -> UserGet:
         hashed_password = self.password_hasher.hash_password(
             user_credential.password
         )
@@ -50,7 +52,9 @@ class UserService:
         return result
 
     @transactional
-    async def login_user(self, user_credential: UserLogin):
+    async def login_user(
+        self, user_credential: UserLogin
+    ) -> dict[str, str]:
         check_if_exists = await self.uow.users.get_user_data(
             user_credential.email
         )
