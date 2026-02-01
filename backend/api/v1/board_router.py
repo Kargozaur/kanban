@@ -96,6 +96,8 @@ async def delete_board(board_id: int, board_svc: BoardSvcDep):
     "/{board_id}/members/add",
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     status_code=201,
+    description="Post method for the router. board_id is a path parameter, \n "
+    "and user_data is a body",
 )
 async def add_member(
     board_id: int,
@@ -111,6 +113,8 @@ async def add_member(
     "/{board_id}/members/update",
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     status_code=200,
+    description="Update method for the router. board_id is a path parameter, \n"
+    "update_member is a body",
 )
 async def update_role(
     board_id: int,
@@ -126,6 +130,8 @@ async def update_role(
     "/{board_id}/members/delete_member/{email}",
     dependencies=[PermissionDep([RoleEnum.ADMIN])],
     status_code=204,
+    description="Delete method for the router. Email and board_id \n"
+    "are both Path parameters.",
 )
 async def delete_user(
     board_id: int,
