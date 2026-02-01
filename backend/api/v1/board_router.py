@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, Body
+from fastapi import APIRouter, Depends, Response
 from backend.core.utility.role_enum import RoleEnum
 from backend.services.services.board_service import BoardService
 from backend.dependancies.board_svc_dep import get_board_svc
