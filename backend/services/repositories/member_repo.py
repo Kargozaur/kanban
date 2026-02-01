@@ -62,7 +62,17 @@ class MemberRepo:
 
     async def add_member(
         self, board_id: int, new_user_data: AddBoardMemberUUID
-    ) -> bool:
+    ) -> bool | str:
+        """Method to add the member for the board.
+        In cases when admin tries to assign admin role for the
+        returns "conflict"
+        Args:
+            board_id (int)
+            new_user_data (AddBoardMemberUUID):
+
+        Returns:
+            bool | str
+        """
         if await self._existing_user(
             board_id=board_id,
             user_id=new_user_data.user_id,
@@ -83,7 +93,18 @@ class MemberRepo:
         board_id: int,
         user_id: UUID,
         new_role: UpdateBoardMember,
-    ) -> bool:
+    ) -> bool | str:
+        """
+        Updates user role by the admin. If admin tries to assign another admin \n
+        returns "conflict"
+        Args:
+            board_id (int)
+            user_id (UUID)
+            new_role (UpdateBoardMember):
+
+        Returns:
+            bool | str
+        """
         if not (
             existing_user := await self._get_membership_record(
                 board_id=board_id, user_id=user_id
@@ -101,6 +122,16 @@ class MemberRepo:
     async def delete_member_from_the_board(
         self, board_id: int, user_id: UUID
     ) -> bool:
+        """
+        Method to delete member from the board. Action may be \n
+        done only by the admin.
+        Args:
+            board_id (int)
+            user_id (UUID)
+
+        Returns:
+            bool
+        """
         if not (
             existing_user := await self._get_membership_record(
                 board_id=board_id, user_id=user_id

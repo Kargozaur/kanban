@@ -45,7 +45,7 @@ class BoardRepository:
             board_data (BoardCreate)
 
         Returns:
-            orm_board | Exception
+            orm_board
         """
         orm_board = Boards(
             owner_id=owner_id,
@@ -87,7 +87,6 @@ class BoardRepository:
         self, user_id: UUID, id: int
     ) -> Sequence[Boards, BoardMembers]:
         """
-
         Get full info about the board
         Args:
             owner_id (UUID):
