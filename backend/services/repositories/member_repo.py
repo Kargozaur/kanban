@@ -1,6 +1,7 @@
 from sqlalchemy import select, Select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.models.models import BoardMembers
+from backend.core.utility.role_enum import RoleEnum
 from backend.schemas.member_schema import (
     AddBoardMemberUUID,
     UpdateBoardMember,
@@ -67,6 +68,8 @@ class MemberRepo:
             user_id=new_user_data.user_id,
         ):
             return False
+        if new_user_data.role == RoleEnum.ADMIN:
+            return "conflict"
         new_member = BoardMembers(
             board_id=board_id,
             user_id=new_user_data.user_id,
@@ -87,6 +90,8 @@ class MemberRepo:
             )
         ):
             return False
+        if new_role.role == RoleEnum.ADMIN:
+            return "conflict"
         users_new_role = new_role.model_dump()
         for k, v in users_new_role.items():
             setattr(existing_user, k, v)

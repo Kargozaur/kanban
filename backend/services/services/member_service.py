@@ -38,13 +38,17 @@ class MemberService:
         )
 
         if not (
-            await self.uow.member.add_member(
+            result := await self.uow.member.add_member(
                 board_id=board_id, new_user_data=new_member
             )
         ):
             raise MemberAlreadyPersists(
                 f"User with the {new_member.user_id} already persists in the board"
             )
+        if result == "conflict":
+            return {
+                "message": "You can not add another admin for the board"
+            }
         return {
             "message": f"succesfully added user with the email {user_data.email}"
         }
@@ -56,14 +60,15 @@ class MemberService:
         user = await self._get_user(email=user_email)
 
         if not (
-            await self.uow.member.update_member_role(
+            result := await self.uow.member.update_member_role(
                 board_id=board_id, user_id=user, new_role=role
             )
         ):
             raise MemberNotFound(
                 f"Member with the id {user} is not found in the board"
             )
-
+        if result == "conflict":
+            return {"message": "You can not set user role as admin"}
         return {
             "message": f"Succesfully updated user role for the user {user_email}"
         }
