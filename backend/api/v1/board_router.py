@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, Response
 from backend.core.utility.role_enum import RoleEnum
 from backend.services.services.board_service import BoardService
 from backend.dependancies.board_svc_dep import get_board_svc
+from backend.dependancies.member_svc_dep import get_member_svc
 from backend.dependancies.permission_dep import CurrentUserDep
 from backend.dependancies.annotated_types import PaginationDep
 from backend.dependancies.permission_dep import PermissionDep
+from backend.services.services.member_service import MemberService
 from backend.schemas.board_schema import (
     BoardCreate,
     BoardGet,
@@ -17,6 +19,7 @@ from backend.schemas.member_schema import (
 from typing import Annotated
 
 BoardSvcDep = Annotated[BoardService, Depends(get_board_svc)]
+MemberSvcDep = Annotated[MemberService, Depends(get_member_svc)]
 
 board_router = APIRouter(prefix="/board", tags=["Board"])
 
@@ -97,9 +100,9 @@ async def delete_board(board_id: int, board_svc: BoardSvcDep):
 async def add_member(
     board_id: int,
     user_data: AddBoardMemberEmail,
-    board_svc: BoardSvcDep,
+    member_svc: MemberSvcDep,
 ):
-    return await board_svc.add_member_to_the_board(
+    return await member_svc.add_member_to_the_board(
         board_id=board_id, user_data=user_data
     )
 
@@ -113,9 +116,9 @@ async def update_role(
     board_id: int,
     email: str,
     update_member: UpdateBoardMember,
-    board_svc: BoardSvcDep,
+    member_svc: MemberSvcDep,
 ):
-    return await board_svc.update_user_role(
+    return await member_svc.update_user_role(
         board_id=board_id, user_email=email, role=update_member
     )
 
@@ -126,8 +129,8 @@ async def update_role(
     status_code=204,
 )
 async def delete_user(
-    board_id: int, email: str, board_svc: BoardSvcDep
+    board_id: int, email: str, member_svc: MemberSvcDep
 ):
-    await board_svc.delete_user_from_the_board(
+    await member_svc.delete_user_from_the_board(
         board_id=board_id, user_email=email
     )
