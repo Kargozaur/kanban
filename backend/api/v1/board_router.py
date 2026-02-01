@@ -15,6 +15,7 @@ from backend.schemas.board_schema import (
 from backend.schemas.member_schema import (
     AddBoardMemberEmail,
     UpdateBoardMember,
+    EmailBase,
 )
 from typing import Annotated
 
@@ -128,8 +129,10 @@ async def update_role(
     status_code=204,
 )
 async def delete_user(
-    board_id: int, email: str, member_svc: MemberSvcDep
+    board_id: int,
+    email: EmailBase,
+    member_svc: MemberSvcDep,
 ):
     await member_svc.delete_user_from_the_board(
-        board_id=board_id, user_email=email
+        board_id=board_id, user_email=email.email
     )

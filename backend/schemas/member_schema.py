@@ -4,6 +4,10 @@ from typing import Annotated
 from uuid import UUID
 
 
+class EmailBase(BaseModel):
+    email: str
+
+
 class AddBoardMemberBase(BaseModel):
     role: Annotated[
         RoleEnum,
@@ -37,8 +41,7 @@ class AddBoardMemberUUID(AddBoardMemberBase):
     ]
 
 
-class UpdateBoardMember(BaseModel):
-    email: str
+class UpdateBoardMember(EmailBase):
     role: Annotated[
         RoleEnum,
         Field(
