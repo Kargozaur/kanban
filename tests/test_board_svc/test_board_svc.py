@@ -61,7 +61,7 @@ async def test_get_board(auth_client):
     assert len(data) > 0
 
 
-async def test_unathoreized_get(unathorized_client, auth_client):
+async def test_unathoreized_get(client, auth_client):
     await auth_client.post(
         "/api/v1/board/",
         json={
@@ -72,7 +72,7 @@ async def test_unathoreized_get(unathorized_client, auth_client):
     result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     id = data[0]["id"]
-    response = await unathorized_client.get(f"/api/v1/board/{id}")
+    response = await client.get(f"/api/v1/board/{id}")
     assert response.status_code == 401
 
 
