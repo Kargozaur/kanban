@@ -2,6 +2,7 @@ from fastapi import APIRouter, Response, Request
 from backend.dependancies.user_dep import UserSvcDep
 from backend.dependancies.auth_dep import CurrentUserDep
 from backend.dependancies.annotated_types import FormData
+from backend.schemas.token_schema import TokenResponse
 from backend.schemas.user_schema import (
     UserCredentials,
     UserGet,
@@ -15,6 +16,7 @@ def create_auth_router():
     @user_auth_router.post(
         "/sign_up",
         status_code=201,
+        response_model=UserGet,
         description="Creates a new user. Name field is optional. \n "
         "If empty, name would be set based on regex and provided email. ",
         response_description="Returns user id, email, name. ",
@@ -27,6 +29,7 @@ def create_auth_router():
     @user_auth_router.post(
         "/login",
         status_code=201,
+        response_model=TokenResponse,
         description="Compares user credentials. If credentials right, returns a JWT token. \n"
         "Username field expects users email.",
     )
