@@ -111,7 +111,7 @@ class BoardRepository:
 
     async def update_board(
         self, board_id: int, data_to_update: BoardUpdate
-    ) -> Sequence[Boards] | None:
+    ) -> Boards | None:
         """
         Updates Boards table. User has to have Admin role. Role is managed inside the endpoint
         Args:
@@ -135,7 +135,7 @@ class BoardRepository:
         await self.session.flush()
         return board
 
-    async def delete_board(self, id: int) -> bool:
+    async def delete_board(self, id: int) -> None | True:
         """
         Deletes board. To delete the board, user has to have Admin role. \n
         Role is managed inside the router
