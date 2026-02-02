@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, Response, Request
-from typing import Annotated
-from backend.dependancies.user_dep import get_user_service
+from fastapi import APIRouter, Response, Request
+from backend.dependancies.user_dep import UserSvcDep
 from backend.dependancies.auth_dep import CurrentUserDep
 from backend.dependancies.annotated_types import FormData
-from backend.services.services.user_service import UserService
 from backend.schemas.user_schema import (
     UserCredentials,
     UserGet,
@@ -12,8 +10,6 @@ from backend.schemas.user_schema import (
 
 
 def create_auth_router():
-    UserSvcDep = Annotated[UserService, Depends(get_user_service)]
-
     user_auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
     @user_auth_router.post(

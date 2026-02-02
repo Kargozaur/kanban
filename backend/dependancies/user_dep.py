@@ -1,9 +1,11 @@
+from fastapi import Depends
 from backend.dependancies.annotated_types import (
     TokenDep,
     PasswordDep,
 )
 from backend.dependancies.uow_dep import UOWDep
 from backend.services.services.user_service import UserService
+from typing import Annotated
 
 
 def get_user_service(
@@ -12,3 +14,6 @@ def get_user_service(
     token_svc: TokenDep,
 ) -> UserService:
     return UserService(uow, password_hasher, token_svc)
+
+
+UserSvcDep = Annotated[UserService, Depends(get_user_service)]
