@@ -27,6 +27,9 @@ import logging
 from backend.exceptions_handlers.columns_exception_handler import (
     columns_exception_handler,
 )
+from backend.exceptions_handlers.sqlalchemy_exception_handler import (
+    sqlalchemy_handler,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +51,7 @@ def create_app() -> FastAPI:
     user_exception_handler(app)
     member_exception_handler(app)
     columns_exception_handler(app)
+    sqlalchemy_handler(app)
     app.include_router(create_api_router())
 
     @app.get("/")
