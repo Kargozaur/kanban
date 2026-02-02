@@ -86,7 +86,11 @@ class BoardMembers(Base):
         "User", back_populates="board_members"
     )
 
-    __table_args__ = (UniqueConstraint("board_id", "user_id"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "board_id", "user_id", name="uq_member_per_board"
+        ),
+    )
 
 
 class Columns(IdMixin, Base):
@@ -95,7 +99,7 @@ class Columns(IdMixin, Base):
     )
     name: Mapped[str] = mapped_column(String(100))
     position: Mapped[Decimal] = mapped_column(
-        DECIMAL(10, 20), nullable=False
+        DECIMAL(10, 2), nullable=False
     )
     wip_limit: Mapped[int] = mapped_column(nullable=True)
 
@@ -103,7 +107,21 @@ class Columns(IdMixin, Base):
         "Boards", back_populates="columns"
     )
     tasks: Mapped[list["Tasks"]] = relationship(
-        "Tasks", order_by="Tasks.position", back_populates="columns"
+        "Tasks",
+        order_by="Tasks.position",
+        back_populates="columns",
+        cascade="all, delete-orphan",
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "board_id", "name", name="uq_column_name_per_board"
+        ),
+        UniqueConstraint(
+            "board_id",
+            "position",
+            name="uq_column_position_per_board",
+        ),
     )
 
 
@@ -116,7 +134,7 @@ class Tasks(IdMixin, OwnedBy, CreatedAt, Base):
         String(200),
     )
     position: Mapped[Decimal] = mapped_column(
-        DECIMAL(10, 20), nullable=False
+        DECIMAL(10, 2), nullable=False
     )
     columns: Mapped["Columns"] = relationship(
         "Columns", back_populates="tasks"
