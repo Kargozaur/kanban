@@ -16,20 +16,18 @@ def create_auth_router():
     @user_auth_router.post(
         "/sign_up",
         status_code=201,
-        response_model=UserGet,
         description="Creates a new user. Name field is optional. \n "
         "If empty, name would be set based on regex and provided email. ",
         response_description="Returns user id, email, name. ",
     )
     async def sign_up(
         user_credentials: UserCredentials, user_svc: UserSvcDep
-    ):
+    ) -> UserGet:
         return await user_svc.create_user(user_credentials)
 
     @user_auth_router.post(
         "/login",
         status_code=201,
-        response_model=TokenResponse,
         description="Compares user credentials. If credentials right, returns a JWT token. \n"
         "Username field expects users email.",
     )
@@ -38,7 +36,7 @@ def create_auth_router():
         response: Response,
         user_svc: UserSvcDep,
         form_data: FormData,
-    ):
+    ) -> TokenResponse:
         existing_token = request.cookies.get("access_token")
         if existing_token:
             return {"message": "You are already logged in"}
@@ -64,8 +62,8 @@ def create_auth_router():
         )
         return {"message": "Succesfully logged out"}
 
-    @user_auth_router.get("/me", response_model=UserGet)
-    async def get_me(current_user: CurrentUserDep):
+    @user_auth_router.get("/me")
+    async def get_me(current_user: CurrentUserDep) -> UserGet:
         return current_user
 
     return user_auth_router

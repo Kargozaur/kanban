@@ -18,7 +18,6 @@ def create_columns_router():
     @columns_router.post(
         "/add",
         status_code=201,
-        response_model=ColumnGet,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         description="Add column to the board. Requires admin role",
     )
@@ -26,7 +25,7 @@ def create_columns_router():
         board_id: int,
         column_data: ColumnCreate,
         columns_svc: ColumnSvcDep,
-    ):
+    ) -> ColumnGet:
         return await columns_svc.add_column(
             board_id=board_id, column_data=column_data
         )
@@ -34,7 +33,6 @@ def create_columns_router():
     @columns_router.get(
         "/{column_id}",
         status_code=200,
-        response_model=ColumnGetFull,
         dependencies=[
             PermissionDep(
                 [RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER]
@@ -44,7 +42,7 @@ def create_columns_router():
     )
     async def get_column(
         column_id: int, board_id: int, columns_svc: ColumnSvcDep
-    ):
+    ) -> ColumnGetFull:
         return await columns_svc.get_column_with_task(
             column_id=column_id, board_id=board_id
         )
@@ -52,7 +50,6 @@ def create_columns_router():
     @columns_router.patch(
         "/{column_id}",
         status_code=200,
-        response_model=ColumnGet,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         description="Update a column. Requires admin role ",
     )
@@ -61,7 +58,7 @@ def create_columns_router():
         board_id: int,
         new_column_data: ColumnUpdate,
         columns_svc: ColumnSvcDep,
-    ):
+    ) -> ColumnGet:
         return await columns_svc.update_column(
             column_id=column_id,
             board_id=board_id,

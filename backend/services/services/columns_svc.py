@@ -26,7 +26,7 @@ class ColumnService:
     @read_only
     async def get_column_with_task(
         self, column_id: int, board_id: int
-    ) -> ColumnGet:
+    ) -> ColumnGetFull:
         result = await self.uow.columns.get_column_with_tasks(
             column_id=column_id, board_id=board_id
         )

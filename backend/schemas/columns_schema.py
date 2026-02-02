@@ -65,4 +65,4 @@ class ColumnGet(BaseModel):
 
 
 class ColumnGetFull(ColumnGet):
-    tasks: list[TaskView]
+    tasks: list[TaskView] = Field(default_factory=list)

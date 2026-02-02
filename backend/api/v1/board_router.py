@@ -26,7 +26,6 @@ def create_board_router():
     @board_router.post(
         "/",
         status_code=201,
-        response_model=BoardGet,
         description="Endpoint to create a new board",
         response_description="Returns board id, name, description, created and owner.",
     )
@@ -34,7 +33,7 @@ def create_board_router():
         board_svc: BoardSvcDep,
         current_user: CurrentUserDep,
         board_data: BoardCreate,
-    ):
+    ) -> BoardGet:
         return await board_svc.create_board(
             owner_id=current_user.id, board_data=board_data
         )
@@ -42,7 +41,6 @@ def create_board_router():
     @board_router.get(
         "/all",
         status_code=200,
-        response_model=list[BoardGet],
         description="Returns all boards where user presented",
         response_description="returns a list of all the boards, where user exists",
     )
@@ -50,20 +48,19 @@ def create_board_router():
         board_svc: BoardSvcDep,
         current_user: CurrentUserDep,
         pagination: PaginationDep,
-    ):
+    ) -> list[BoardGet]:
         return await board_svc.get_boards(
             user_id=current_user.id, pagination=pagination
         )
 
     @board_router.get(
         "/{id}",
-        response_model=BoardFullView,
         description="Gets a full about the board",
         response_description="Gets a full data about the Board",
     )
     async def get_full_board(
         id: int, board_svc: BoardSvcDep, current_user: CurrentUserDep
-    ):
+    ) -> BoardFullView:
         return await board_svc.get_board(
             user_id=current_user.id, id=id
         )
@@ -71,13 +68,12 @@ def create_board_router():
     @board_router.patch(
         "/{board_id}",
         status_code=200,
-        response_model=BoardGet,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         description="Updates board based on data provided. User has to have admin role to perform this action",
     )
     async def update_board(
         board_id: int, board_svc: BoardSvcDep, new_data: BoardUpdate
-    ):
+    ) -> BoardGet:
         return await board_svc.update_board(
             board_id=board_id, data_to_update=new_data
         )

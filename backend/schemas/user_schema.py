@@ -52,9 +52,12 @@ class UserLogin(BaseModel):
     ]
 
 
-class UserGet(BaseModel):
-    id: UUID
+class UserGetForTotal(BaseModel):
     email: str
     name: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserGet(UserGetForTotal):
+    id: UUID

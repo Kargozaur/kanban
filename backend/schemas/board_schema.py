@@ -3,7 +3,8 @@ from uuid import UUID
 from datetime import datetime
 from typing import Annotated
 from backend.core.utility.role_enum import RoleEnum
-from backend.schemas.user_schema import UserGet
+from backend.schemas.user_schema import UserGetForTotal
+from decimal import Decimal
 
 
 class BoardCreate(BaseModel):
@@ -50,13 +51,12 @@ class BoardUpdate(BaseModel):
 
 class MemberView(BaseModel):
     role: RoleEnum
-    user: UserGet
+    user: UserGetForTotal
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class TaskBoardView(BaseModel):
-    id: int
     title: str
     description: str
     priority: int
@@ -66,10 +66,11 @@ class TaskBoardView(BaseModel):
 
 
 class ColumnBoardView(BaseModel):
-    id: int
     name: str
-    orders: int
-    tasks: list[TaskBoardView] = Field(default=list)
+    position: Decimal
+    tasks: list[TaskBoardView] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BoardFullView(BaseModel):
