@@ -56,6 +56,7 @@ class ColumnUpdate(BaseModel):
 
 
 class ColumnGet(BaseModel):
+    id: int
     name: str
     position: Decimal
     wip_limit: int | None
