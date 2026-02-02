@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
 from datetime import datetime
-from typing import Optional, Annotated
+from typing import Annotated
 from backend.core.utility.role_enum import RoleEnum
 from backend.schemas.user_schema import UserGet
 
@@ -44,8 +44,8 @@ class BoardGet(BoardGetBase):
 
 
 class BoardUpdate(BaseModel):
-    name: Annotated[Optional[str], Field(default=None, min_length=8)]
-    description: Annotated[Optional[str], Field(default=None)]
+    name: Annotated[str | None, Field(default=None, min_length=8)]
+    description: Annotated[str | None, Field(default=None)]
 
 
 class MemberView(BaseModel):

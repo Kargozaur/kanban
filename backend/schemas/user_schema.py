@@ -6,7 +6,7 @@ from pydantic import (
     model_validator,
     Field,
 )
-from typing import Annotated, Optional
+from typing import Annotated
 from typing_extensions import Doc
 from backend.core.utility.password_verifier import verify_password
 from uuid import UUID
@@ -29,7 +29,7 @@ class UserCredentials(BaseModel):
         PasswordField, Field(examples=["SuperPassword!123"])
     ]
     name: Annotated[
-        Optional[str], Field(default=None, examples=["User Name"])
+        str | None, Field(default=None, examples=["User Name"])
     ]
 
     """validator in case if user didn't set their name"""
