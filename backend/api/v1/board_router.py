@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Response
 from backend.core.utility.role_enum import RoleEnum
-from backend.services.services.board_service import BoardService
-from backend.dependancies.board_svc_dep import get_board_svc
+from backend.dependancies.board_svc_dep import BoardSvcDep
 from backend.dependancies.permission_dep import CurrentUserDep
 from backend.dependancies.annotated_types import PaginationDep
 from backend.dependancies.permission_dep import PermissionDep
@@ -14,11 +13,8 @@ from backend.schemas.board_schema import (
     BoardUpdate,
 )
 
-from typing import Annotated
-
 
 def create_board_router():
-    BoardSvcDep = Annotated[BoardService, Depends(get_board_svc)]
     board_router = APIRouter(prefix="/board", tags=["Board"])
     board_router.include_router(create_member_router())
 

@@ -1,23 +1,20 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from backend.core.utility.role_enum import RoleEnum
-from backend.services.services.member_service import MemberService
-from backend.dependancies.member_svc_dep import get_member_svc
+from backend.dependancies.member_svc_dep import MemberSvcDep
 from backend.dependancies.permission_dep import PermissionDep
 from backend.schemas.member_schema import (
     AddBoardMemberEmail,
     UpdateBoardMember,
 )
-from typing import Annotated
 
 
 def create_member_router():
-    MemberSvcDep = Annotated[MemberService, Depends(get_member_svc)]
     member_router = APIRouter(
-        prefix="/{board_id}", tags=["Board", "BoardMembers"]
+        prefix="/{board_id}/members", tags=["Board", "BoardMembers"]
     )
 
     @member_router.post(
-        "/members/add",
+        "/add",
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         status_code=201,
         description="Post method for the router. board_id is a path parameter, \n "
@@ -33,7 +30,7 @@ def create_member_router():
         )
 
     @member_router.patch(
-        "/members/update",
+        "/update",
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         status_code=200,
         description="Update method for the router. board_id is a path parameter, \n"
@@ -49,7 +46,7 @@ def create_member_router():
         )
 
     @member_router.delete(
-        "/members/delete_member/{email}",
+        "/delete_member/{email}",
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         status_code=204,
         description="Delete method for the router. Email and board_id \n"
