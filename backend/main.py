@@ -7,7 +7,7 @@ from backend.database.db_config import init_db
 from backend.database.database_provider import DatabaseProvider
 from backend.core.security.password_hasher import get_hasher
 from backend.core.security.token_svc import get_token_svc
-from backend.api.routers import api_router
+from backend.api.routers import create_api_router
 from backend.exceptions_handlers.base_exception_handler import (
     base_exception_handler,
 )
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
     pydantic_exceptions_handler(app)
     user_exception_handler(app)
     member_exception_handler(app)
-    app.include_router(api_router)
+    app.include_router(create_api_router())
 
     @app.get("/")
     async def main():
