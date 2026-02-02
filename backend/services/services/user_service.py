@@ -12,6 +12,7 @@ from backend.core.exceptions.exceptions import (
     NotFoundError,
     UserAlreadyExists,
 )
+import anyio
 
 
 class UserService:
@@ -55,17 +56,19 @@ class UserService:
     async def login_user(
         self, user_credential: UserLogin
     ) -> dict[str, str]:
-        check_if_exists = await self.uow.users.get_user_data(
-            user_credential.email
-        )
-        if (
-            check_if_exists is None
-            or not self.password_hasher.verify_password(
-                user_credential.password, check_if_exists.password
+        if not (
+            check_if_exists := await self.uow.users.get_user_data(
+                user_credential.email
             )
         ):
             raise NotFoundError()
-
+        is_password_correct = await anyio.to_thread.run_sync(
+            self.password_hasher.verify_password,
+            user_credential.password,
+            check_if_exists.password,
+        )
+        if not is_password_correct:
+            raise NotFoundError()
         access_token = self.token_service.create_token(
             check_if_exists
         )
