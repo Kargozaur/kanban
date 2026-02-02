@@ -103,7 +103,7 @@ class Columns(IdMixin, Base):
         "Boards", back_populates="columns"
     )
     tasks: Mapped[list["Tasks"]] = relationship(
-        "Tasks", back_populates="columns"
+        "Tasks", order_by="Tasks.position", back_populates="columns"
     )
 
 
@@ -115,7 +115,9 @@ class Tasks(IdMixin, OwnedBy, CreatedAt, Base):
     description: Mapped[str] = mapped_column(
         String(200),
     )
-    position: Mapped[int]
+    position: Mapped[Decimal] = mapped_column(
+        DECIMAL(10, 20), nullable=False
+    )
     columns: Mapped["Columns"] = relationship(
         "Columns", back_populates="tasks"
     )

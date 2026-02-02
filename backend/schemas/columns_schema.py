@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
 from decimal import Decimal
+from backend.schemas.tasks_schema import TaskView
 
 
 class ColumnCreate(BaseModel):
@@ -50,13 +51,17 @@ class ColumnUpdate(BaseModel):
     ]
 
     wip_limit: Annotated[
-        int | None, Field(default=None, ge=1, examples=[1, 0])
+        int | None, Field(default=None, ge=1, examples=[1])
     ]
 
 
 class ColumnGet(BaseModel):
     name: str
     position: Decimal
-    wip_limit: int
+    wip_limit: int | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ColumnGetFull(ColumnGet):
+    tasks: list[TaskView]

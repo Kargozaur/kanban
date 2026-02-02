@@ -49,7 +49,7 @@ class ColumnsRepo:
 
     async def add_column(
         self, board_id: int, column_data: ColumnCreate
-    ):
+    ) -> Columns:
         if not column_data.position:
             column_data.position = await self._new_column_position(
                 board_id=board_id
@@ -67,7 +67,7 @@ class ColumnsRepo:
 
     async def update_column(
         self, column_id: int, board_id: int, new_data: ColumnUpdate
-    ) -> Columns | None:
+    ) -> None | Columns:
         if not (
             column := await self._get_column(
                 column_id=column_id, board_id=board_id
@@ -84,7 +84,9 @@ class ColumnsRepo:
         await self.session.flush()
         return column
 
-    async def drop_column(self, column_id: int, board_id: int):
+    async def drop_column(
+        self, column_id: int, board_id: int
+    ) -> None | True:
         if not (
             column := await self._get_column(
                 column_id=column_id, board_id=board_id
