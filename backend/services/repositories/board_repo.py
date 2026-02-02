@@ -148,7 +148,7 @@ class BoardRepository:
         """
 
         if not (board := await self.session.get(Boards, id)):
-            return False
+            return None
 
         logging.info(f"DEBUG - board = {board}")
 
