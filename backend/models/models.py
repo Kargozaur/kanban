@@ -6,8 +6,8 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )
-from uuid import uuid4, UUID as uuid
-from sqlalchemy.types import String, UUID
+
+from sqlalchemy.types import String, UUID, DECIMAL
 from backend.models.camel_to_snake import camel_to_snake
 from backend.core.utility.role_enum import RoleEnum
 from backend.models.mixins import (
@@ -16,6 +16,8 @@ from backend.models.mixins import (
     OwnedBy,
     IdMixin,
 )
+from uuid import uuid4, UUID as uuid
+from decimal import Decimal
 
 
 class Base(DeclarativeBase):
@@ -92,7 +94,9 @@ class Columns(IdMixin, Base):
         ForeignKey("boards.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(100))
-    position: Mapped[int] = mapped_column(nullable=False)
+    position: Mapped[Decimal] = mapped_column(
+        DECIMAL(10, 20), nullable=False
+    )
     wip_limit: Mapped[int] = mapped_column(nullable=True)
 
     boards: Mapped["Boards"] = relationship(
