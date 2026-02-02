@@ -9,7 +9,6 @@ from backend.api.v1.board_router_ext.member_router import (
 )
 from backend.schemas.board_schema import (
     BoardCreate,
-    BoardGet,
     BoardUpdate,
 )
 
@@ -21,7 +20,6 @@ def create_board_router():
     @board_router.post(
         "/",
         status_code=201,
-        response_model=BoardGet,
         description="Endpoint to create a new board",
         response_description="Returns board id, name, description, created and owner.",
     )

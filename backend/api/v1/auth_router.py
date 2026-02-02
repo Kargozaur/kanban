@@ -15,7 +15,6 @@ def create_auth_router():
     @user_auth_router.post(
         "/sign_up",
         status_code=201,
-        response_model=UserGet,
         description="Creates a new user. Name field is optional. \n "
         "If empty, name would be set based on regex and provided email. ",
         response_description="Returns user id, email, name. ",
