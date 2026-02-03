@@ -45,8 +45,10 @@ class User(CreatedAt, UpdatedAt, Base):
         cascade="all, delete-orphan",
     )
     tasks: Mapped[list[Tasks]] = relationship(
-        "Tasks",
-        back_populates="user",
+        "Tasks", back_populates="user", foreign_keys="[Tasks.owner_id]"
+    )
+    assigned_task: Mapped[list[Tasks]] = relationship(
+        "Tasks", back_populates="assignee", foreign_keys="[Tasks.assignee_id]"
     )
 
 
@@ -62,6 +64,10 @@ class Boards(IdMixin, OwnedBy, CreatedAt, Base):
         "Columns",
         back_populates="boards",
         cascade="all, delete-orphan",
+    )
+
+    tasks: Mapped[list[Tasks]] = relationship(
+        "Tasks", back_populates="boards", cascade="all, delete-orphan"
     )
 
 
@@ -115,8 +121,12 @@ class Columns(IdMixin, Base):
 
 
 class Tasks(IdMixin, OwnedBy, CreatedAt, Base):
-    column_id: Mapped[int] = mapped_column(
-        ForeignKey("columns.id", ondelete="SET NULL")
+    column_id: Mapped[int] = mapped_column(ForeignKey("columns.id", ondelete="CASCADE"))
+    board_id: Mapped[int] = mapped_column(
+        ForeignKey("boards.id", ondelete="CASCADE"), nullable=False
+    )
+    assignee_id: Mapped[uuid | None] = mapped_column(
+        ForeignKey("user.id", ondelete="SET NULL"), nullable=True
     )
     title: Mapped[str] = mapped_column(String(70), nullable=False)
     description: Mapped[str] = mapped_column(
@@ -124,3 +134,16 @@ class Tasks(IdMixin, OwnedBy, CreatedAt, Base):
     )
     position: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
     columns: Mapped[Columns] = relationship("Columns", back_populates="tasks")
+    assignee: Mapped[User] = relationship(
+        "User",
+        foreign_keys=[assignee_id],
+        lazy="selectin",
+        back_populates="assigned_task",
+    )
+    boards: Mapped[Boards] = relationship(
+        "Boards", back_populates="tasks", foreign_keys=[board_id], lazy="selectin"
+    )
+
+    user: Mapped[User] = relationship(
+        "User", back_populates="tasks", foreign_keys="[Tasks.owner_id]"
+    )
