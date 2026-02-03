@@ -12,3 +12,6 @@ wheels/
 .env
 
 test.db
+kanban.session.sql
+.vscode
+kanban.erd.json
