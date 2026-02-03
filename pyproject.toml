@@ -33,6 +33,6 @@ select = ["E", "F", "I", "W", "ANN", "UP"]
 ignore = ["ANN101"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["my_app"]
+known-first-party = ["backend"]
 combine-as-imports = true
 lines-after-imports = 2
