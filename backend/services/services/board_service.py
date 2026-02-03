@@ -75,7 +75,7 @@ class BoardService:
 
     @transactional
     async def delete_board(self, id: int) -> str:
-        result = await self.uow.boards.delete_board(id)
+        result: None | bool = await self.uow.boards.delete_board(id)
         if not result:
-            raise BoardPermissionDenied(result["detail"])
+            raise BoardPermissionDenied("")
         return f"Board {id} was succesfully deleted"

@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
 from decimal import Decimal
 from backend.schemas.tasks_schema import TaskView
+from backend.schemas.generic import GenericId
 
 
 class ColumnCreate(BaseModel):
@@ -55,8 +56,7 @@ class ColumnUpdate(BaseModel):
     ]
 
 
-class ColumnGet(BaseModel):
-    id: int
+class ColumnGet(GenericId[int]):
     name: str
     position: Decimal
     wip_limit: int | None

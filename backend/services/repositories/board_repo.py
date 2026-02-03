@@ -11,13 +11,16 @@ from backend.schemas.board_schema import (
 from uuid import UUID
 import logging
 from typing import Sequence
+from backend.services.repositories.generic_repo import BaseRepository
 
 logger = logging.getLogger(__name__)
 
 
-class BoardRepository:
+class BoardRepository(
+    BaseRepository[Boards, BoardCreate, BoardUpdate]
+):
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        super().__init__(session, Boards)
 
     def _select_query_builder(
         self, user_id: UUID, id: int | None = None
@@ -47,14 +50,11 @@ class BoardRepository:
         Returns:
             orm_board
         """
-        orm_board = Boards(
+        orm_board = await super().create(
+            data=board_data,
             owner_id=owner_id,
-            name=board_data.name,
-            description=board_data.description,
         )
 
-        self.session.add(orm_board)
-        await self.session.flush()
         owner_membership = BoardMembers(
             board_id=orm_board.id,
             user_id=owner_id,
@@ -80,12 +80,12 @@ class BoardRepository:
             pagination.offset
         )
         result = await self.session.execute(query)
-        rows = result.scalars().all()
+        rows: Sequence[Boards] = result.scalars().all()
         return rows
 
     async def get_board(
         self, user_id: UUID, id: int
-    ) -> Sequence[Boards, BoardMembers]:
+    ) -> Boards | None:
         """
         Get full info about the board
         Args:
@@ -105,7 +105,7 @@ class BoardRepository:
         logging.info(f"DEBUG - pre-result query = {query}")
         result = await self.session.execute(query)
         logging.info(f"DEBUG - result = {result}")
-        row = result.scalar_one_or_none()
+        row: Boards | None = result.scalar_one_or_none()
 
         return row
 
@@ -121,37 +121,28 @@ class BoardRepository:
         Returns:
            None | updated_board
         """
-        if not (board := await self.session.get(Boards, board_id)):
+        if not (
+            board := await super().update(
+                data_to_update=data_to_update, id=board_id
+            )
+        ):
             return None
-        to_update = data_to_update.model_dump(
-            exclude_unset=True, exclude_none=True
-        )
-        logging.info(f"DEBUG - pre-update to_update = {to_update}")
-        if not to_update:
-            return board
-        for k, v in to_update.items():
-            setattr(board, k, v)
-
-        await self.session.flush()
         return board
 
-    async def delete_board(self, id: int) -> None | True:
+    async def delete_board(self, id: int) -> None | bool:
         """
         Deletes board. To delete the board, user has to have Admin role. \n
         Role is managed inside the router
         Args:
             id (int): id of the table
-            user_id (UUID):
 
         Returns:
             bool
         """
 
-        if not (board := await self.session.get(Boards, id)):
+        if not (board := await super().delete(id=id)):
             return None
 
         logging.info(f"DEBUG - board = {board}")
 
-        await self.session.delete(board)
-        await self.session.flush()
         return True

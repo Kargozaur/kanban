@@ -2,19 +2,25 @@ from sqlalchemy import select, Select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.models.models import BoardMembers
 from backend.core.utility.role_enum import RoleEnum
+from backend.services.repositories.generic_repo import BaseRepository
 from backend.schemas.member_schema import (
     AddBoardMemberUUID,
+    UpdateMemberWithId,
 )
 from uuid import UUID
 
 
-class MemberRepo:
+class MemberRepo(
+    BaseRepository[
+        BoardMembers, AddBoardMemberUUID, UpdateMemberWithId
+    ]
+):
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        super().__init__(session, BoardMembers)
 
     def _query_builder(
         self, board_id: int, user_id: UUID
-    ) -> Select[BoardMembers]:
+    ) -> Select[tuple[BoardMembers]]:
         return select(BoardMembers).where(
             BoardMembers.user_id == user_id,
             BoardMembers.board_id == board_id,
@@ -61,7 +67,7 @@ class MemberRepo:
 
     async def add_member(
         self, board_id: int, new_user_data: AddBoardMemberUUID
-    ) -> None | True:
+    ) -> None | bool | str:
         """Method to add the member for the board.
         In cases when admin tries to assign admin role for the
         returns "conflict"
@@ -79,20 +85,12 @@ class MemberRepo:
             return None
         if new_user_data.role == RoleEnum.ADMIN:
             return "conflict"
-        new_member = BoardMembers(
-            board_id=board_id,
-            user_id=new_user_data.user_id,
-            role=new_user_data.role,
-        )
-        self.session.add(new_member)
+        await super().create(new_user_data, board_id=board_id)
         return True
 
     async def update_member_role(
-        self,
-        board_id: int,
-        user_id: UUID,
-        new_role: str,
-    ) -> None | True:
+        self, member_data: UpdateMemberWithId
+    ) -> None | str | BoardMembers:
         """
         Updates user role by the admin. If admin tries to assign another admin \n
         returns "conflict"
@@ -102,19 +100,16 @@ class MemberRepo:
             new_role (UpdateBoardMember):
 
         Returns:
-            bool | str
+            bool | str | str
         """
-        if not (
-            existing_user := await self._get_membership_record(
-                board_id=board_id, user_id=user_id
-            )
-        ):
-            return None
-        if new_role == RoleEnum.ADMIN:
+        if member_data.role == RoleEnum.ADMIN:
             return "conflict"
-        existing_user.role = new_role
-        await self.session.flush()
-        return True
+        new_value = await super().update(
+            data_to_update=member_data,
+            user_id=member_data.user_id,
+            board_id=member_data.id,
+        )
+        return new_value
 
     async def delete_member_from_the_board(
         self, board_id: int, user_id: UUID
@@ -130,11 +125,7 @@ class MemberRepo:
             bool
         """
         if not (
-            existing_user := await self._get_membership_record(
-                board_id=board_id, user_id=user_id
-            )
+            await super().delete(board_id=board_id, user_id=user_id)
         ):
             return None
-        await self.session.delete(existing_user)
-        await self.session.flush()
         return True

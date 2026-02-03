@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from backend.core.utility.role_enum import RoleEnum
 from typing import Annotated
 from uuid import UUID
+from backend.schemas.generic import GenericId
 
 
 class EmailBase(BaseModel):
@@ -42,6 +43,17 @@ class AddBoardMemberUUID(AddBoardMemberBase):
 
 
 class UpdateBoardMember(EmailBase):
+    role: Annotated[
+        RoleEnum,
+        Field(
+            default=RoleEnum.VIEWER,
+            description="Changes the role of the user inside the board",
+        ),
+    ]
+
+
+class UpdateMemberWithId(GenericId[int]):
+    user_id: UUID
     role: Annotated[
         RoleEnum,
         Field(

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Annotated
 from backend.core.utility.role_enum import RoleEnum
 from backend.schemas.user_schema import UserGetForTotal
+from backend.schemas.generic import GenericId
 from decimal import Decimal
 
 
@@ -31,8 +32,7 @@ class BoardCreate(BaseModel):
     ]
 
 
-class BoardGetBase(BaseModel):
-    id: int
+class BoardGetBase(GenericId[int]):
     name: str
     description: str
     created_at: datetime
@@ -73,7 +73,7 @@ class ColumnBoardView(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class BoardFullView(BaseModel):
+class BoardFullView(GenericId[int]):
     id: int
     name: str
     description: str

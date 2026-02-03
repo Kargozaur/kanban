@@ -9,6 +9,7 @@ from pydantic import (
 from typing import Annotated
 from typing_extensions import Doc
 from backend.core.utility.password_verifier import verify_password
+from backend.schemas.generic import GenericId
 from uuid import UUID
 
 PasswordField = Annotated[
@@ -59,5 +60,5 @@ class UserGetForTotal(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserGet(UserGetForTotal):
-    id: UUID
+class UserGet(UserGetForTotal, GenericId[UUID]):
+    pass

@@ -3,16 +3,19 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.models.models import Columns
 from backend.schemas.columns_schema import ColumnCreate, ColumnUpdate
+from backend.services.repositories.generic_repo import BaseRepository
 from decimal import Decimal
 
 
-class ColumnsRepo:
+class ColumnsRepo(
+    BaseRepository[Columns, ColumnCreate, ColumnUpdate]
+):
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        super().__init__(session, Columns)
 
     def _query_builder(
         self, column_id: int, board_id: int
-    ) -> Select[Columns]:
+    ) -> Select[tuple[Columns]]:
         return select(Columns).where(
             Columns.id == column_id, Columns.board_id == board_id
         )
@@ -56,15 +59,16 @@ class ColumnsRepo:
             column_data.position = await self._new_column_position(
                 board_id=board_id
             )
-        new_column = Columns(
-            board_id=board_id,
-            name=column_data.name,
-            position=column_data.position,
-            wip_limit=column_data.wip_limit,
+        # new_column = Columns(
+        #     board_id=board_id,
+        #     name=column_data.name,
+        #     position=column_data.position,
+        #     wip_limit=column_data.wip_limit,
+        # )
+        new_column = await super().create(
+            column_data, board_id=board_id
         )
 
-        self.session.add(new_column)
-        await self.session.flush()
         return new_column
 
     async def update_column(
@@ -73,33 +77,18 @@ class ColumnsRepo:
         """
         Tries to update column. If columnt not found, returns None
         """
-        if not (
-            column := await self._get_column(
-                column_id=column_id, board_id=board_id
-            )
-        ):
-            return None
-
-        data_to_update = new_data.model_dump(exclude_unset=True)
-        if not data_to_update:
-            return column
-
-        for k, v in data_to_update.items():
-            setattr(column, k, v)
-        await self.session.flush()
-        return column
+        result: None | Columns = await super().update(
+            new_data, board_id=board_id, id=column_id
+        )
+        return result
 
     async def drop_column(
         self, column_id: int, board_id: int
-    ) -> None | True:
+    ) -> None | bool:
         """Tries to delete the column. If column not found, returns None"""
-        if not (
-            column := await self._get_column(
-                column_id=column_id, board_id=board_id
-            )
-        ):
-            return None
-        await self.session.delete(column)
-        await self.session.flush()
 
-        return True
+        column: None | bool = await super().delete(
+            id=column_id, board_id=board_id
+        )
+
+        return column

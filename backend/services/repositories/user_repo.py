@@ -3,14 +3,15 @@ from sqlalchemy.orm import load_only
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.schemas.user_schema import UserCredentials
 from backend.models.models import User
+from backend.services.repositories.generic_repo import BaseRepository
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class UserRepository:
+class UserRepository(BaseRepository[User, UserCredentials]):
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        super().__init__(session, User)
 
     def _get_user_by_email_helper(
         self, email: str
@@ -21,7 +22,7 @@ class UserRepository:
         """method to check if email is taken or not \n
         True if exists, False if not
         """
-        result: tuple[User] = await self.session.execute(
+        result = await self.session.execute(
             self._get_user_by_email_helper(email)
         )
         return result.scalar() is not None
@@ -34,30 +35,23 @@ class UserRepository:
         query = query.options(
             load_only(User.id, User.email, User.name)
         )
-        result: tuple[User] = await self.session.execute(query)
-        row = result.scalar_one_or_none()
+        result = await self.session.execute(query)
+        row: User | None = result.scalar_one_or_none()
         return row
 
-    async def create_user(self, user_data: UserCredentials) -> dict:
+    async def create_user(
+        self, user_data: UserCredentials
+    ) -> User | None:
         """
         Creates user if check_user is False
         """
 
-        check_user: bool = await self._check_if_email_exists(
-            user_data.email
-        )
-        logger.info(f"DEBUG - check_user = {check_user}")
-        if check_user is True:
+        if await self._check_if_email_exists(user_data.email):
             return None
-        logging.info(f"Email received in the repo: {user_data.email}")
-        from_orm_user = User(
-            email=user_data.email,
-            name=user_data.name,
-            password=user_data.password,
-        )
 
-        self.session.add(from_orm_user)
-        await self.session.flush()
+        logging.info(f"Email received in the repo: {user_data.email}")
+        from_orm_user = await super().create(user_data)
+
         return from_orm_user
 
     async def get_user_data(self, email: str):

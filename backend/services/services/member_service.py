@@ -8,6 +8,7 @@ from backend.schemas.member_schema import (
     AddBoardMemberEmail,
     AddBoardMemberUUID,
     UpdateBoardMember,
+    UpdateMemberWithId,
 )
 from backend.core.exceptions.members_exceptions import (
     MemberNotFound,
@@ -59,13 +60,11 @@ class MemberService:
         self, board_id: int, user_data: UpdateBoardMember
     ) -> dict[str, str]:
         user = await self._get_user(email=user_data.email)
-
+        model = UpdateMemberWithId(
+            id=board_id, user_id=user, role=user_data.role
+        )
         if not (
-            result := await self.uow.member.update_member_role(
-                board_id=board_id,
-                user_id=user,
-                new_role=user_data.role,
-            )
+            result := await self.uow.member.update_member_role(model)
         ):
             raise MemberNotFound(
                 f"Member with the id {user} is not found in the board"
