@@ -1,19 +1,18 @@
 from fastapi import APIRouter
+
 from backend.core.utility.role_enum import RoleEnum
 from backend.dependancies.columns_dep import ColumnSvcDep
 from backend.dependancies.permission_dep import PermissionDep
 from backend.schemas.columns_schema import (
     ColumnCreate,
-    ColumnUpdate,
-    ColumnGetFull,
     ColumnGet,
+    ColumnGetFull,
+    ColumnUpdate,
 )
 
 
-def create_columns_router():
-    columns_router = APIRouter(
-        prefix="/{board_id}/columns", tags=["Board", "Columns"]
-    )
+def create_columns_router() -> APIRouter:
+    columns_router = APIRouter(prefix="/{board_id}/columns", tags=["Board", "Columns"])
 
     @columns_router.post(
         "/add",
@@ -26,17 +25,13 @@ def create_columns_router():
         column_data: ColumnCreate,
         columns_svc: ColumnSvcDep,
     ) -> ColumnGet:
-        return await columns_svc.add_column(
-            board_id=board_id, column_data=column_data
-        )
+        return await columns_svc.add_column(board_id=board_id, column_data=column_data)
 
     @columns_router.get(
         "/{column_id}",
         status_code=200,
         dependencies=[
-            PermissionDep(
-                [RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER]
-            )
+            PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
         ],
         description="Get a full view on the column.",
     )
@@ -73,9 +68,7 @@ def create_columns_router():
     )
     async def delete_column(
         column_id: int, board_id: int, columns_svc: ColumnSvcDep
-    ):
-        await columns_svc.drop_column(
-            column_id=column_id, board_id=board_id
-        )
+    ) -> None:
+        await columns_svc.drop_column(column_id=column_id, board_id=board_id)
 
     return columns_router

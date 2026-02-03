@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Annotated
 from decimal import Decimal
-from backend.schemas.tasks_schema import TaskView
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field
+
 from backend.schemas.generic import GenericId
+from backend.schemas.tasks_schema import TaskView
 
 
 class ColumnCreate(BaseModel):
@@ -25,9 +27,7 @@ class ColumnCreate(BaseModel):
             examples=["1.0", "1.5"],
         ),
     ]
-    wip_limit: Annotated[
-        int | None, Field(default=None, ge=1, examples=[1, 2])
-    ]
+    wip_limit: Annotated[int | None, Field(default=None, ge=1, examples=[1, 2])]
 
 
 class ColumnUpdate(BaseModel):
@@ -51,9 +51,7 @@ class ColumnUpdate(BaseModel):
         ),
     ]
 
-    wip_limit: Annotated[
-        int | None, Field(default=None, ge=1, examples=[1])
-    ]
+    wip_limit: Annotated[int | None, Field(default=None, ge=1, examples=[1])]
 
 
 class ColumnGet(GenericId[int]):

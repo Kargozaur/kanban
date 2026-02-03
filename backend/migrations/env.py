@@ -7,12 +7,13 @@ sys.path.insert(0, str(project_root))
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from backend.models.models import Base
+
 from backend.core.settings.settings import get_settings
-from alembic import context
+from backend.models.models import Base
 
 
 settings = get_settings()
@@ -25,7 +26,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 database_url = settings.postgres.dsn
-if database_url is None:  # type: ignore
+if database_url is None:
     raise ValueError("Database URL is not set")
 config.set_main_option("sqlalchemy.url", database_url)
 # add your model's MetaData object here
@@ -65,9 +66,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(
-        connection=connection, target_metadata=target_metadata
-    )
+    context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
         context.run_migrations()

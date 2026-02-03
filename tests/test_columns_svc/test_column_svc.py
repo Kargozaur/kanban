@@ -1,8 +1,11 @@
+from typing import Any
+
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.fixture
-async def columns(auth_client):
+async def columns(auth_client: AsyncClient) -> dict[str, Any]:
     data = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -29,7 +32,7 @@ async def columns(auth_client):
     }
 
 
-async def test_creation_column(auth_client):
+async def test_creation_column(auth_client: AsyncClient) -> None:
     data = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -52,7 +55,7 @@ async def test_creation_column(auth_client):
     assert data == "my amazing zzz"
 
 
-async def test_creation_column_violation(auth_client):
+async def test_creation_column_violation(auth_client: AsyncClient) -> None:
     data = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -81,7 +84,7 @@ async def test_creation_column_violation(auth_client):
     assert result.status_code == 409
 
 
-async def test_update_column(columns):
+async def test_update_column(columns: dict[str, Any]) -> None:
     auth_client = columns["owner_client"]
     new_name = "my new amazing name"
     result = await auth_client.patch(
@@ -93,7 +96,7 @@ async def test_update_column(columns):
     assert data["name"] == new_name
 
 
-async def test_update_column_violation(columns):
+async def test_update_column_violation(columns: dict[str, Any]) -> None:
     auth_client = columns["owner_client"]
     await auth_client.post(
         f"/api/v1/board/{columns['board_id']}/columns/add",
@@ -110,7 +113,7 @@ async def test_update_column_violation(columns):
     assert result.status_code == 409
 
 
-async def test_delete_column(columns):
+async def test_delete_column(columns: dict[str, Any]) -> None:
     auth_client = columns["owner_client"]
     result = await auth_client.delete(
         f"/api/v1/board/{columns['board_id']}/columns/{columns['column_id']}"

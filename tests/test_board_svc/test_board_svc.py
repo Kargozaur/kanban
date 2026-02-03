@@ -1,4 +1,5 @@
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.parametrize(
@@ -9,8 +10,8 @@ import pytest
     ],
 )
 async def test_board_creation(
-    board_name, description, status_code, auth_client
-):
+    board_name: str, description: str, status_code: int, auth_client: AsyncClient
+) -> None:
     result = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -34,8 +35,8 @@ async def test_board_creation(
     ],
 )
 async def test_board_creation_fail(
-    board_name, description, status_code, auth_client
-):
+    board_name: str, description: str, status_code: int, auth_client: AsyncClient
+) -> None:
     result = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -47,7 +48,7 @@ async def test_board_creation_fail(
     assert result.status_code == status_code
 
 
-async def test_get_board(auth_client):
+async def test_get_board(auth_client: AsyncClient) -> None:
     await auth_client.post(
         "/api/v1/board/",
         json={
@@ -61,7 +62,7 @@ async def test_get_board(auth_client):
     assert len(data) > 0
 
 
-async def test_unathoreized_get(client, auth_client):
+async def test_unathoreized_get(client: AsyncClient, auth_client: AsyncClient) -> None:
     await auth_client.post(
         "/api/v1/board/",
         json={
@@ -76,14 +77,14 @@ async def test_unathoreized_get(client, auth_client):
     assert response.status_code == 401
 
 
-async def test_board_without_creation(auth_client):
+async def test_board_without_creation(auth_client: AsyncClient) -> None:
     result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     assert result.status_code == 200
     assert len(data) == 0
 
 
-async def test_get_single_board(auth_client):
+async def test_get_single_board(auth_client: AsyncClient) -> None:
     await auth_client.post(
         "/api/v1/board/",
         json={
@@ -100,7 +101,7 @@ async def test_get_single_board(auth_client):
     assert len(data) > 0
 
 
-async def test_update_board(auth_client):
+async def test_update_board(auth_client: AsyncClient) -> None:
     await auth_client.post(
         "/api/v1/board/",
         json={
@@ -119,14 +120,12 @@ async def test_update_board(auth_client):
     assert data["id"] == board_id
 
 
-async def test_update_board_fail(auth_client):
-    update = await auth_client.patch(
-        "/api/v1/board/10000", json={"name": " New name"}
-    )
+async def test_update_board_fail(auth_client: AsyncClient) -> None:
+    update = await auth_client.patch("/api/v1/board/10000", json={"name": " New name"})
     assert update.status_code == 404
 
 
-async def test_delete_board(auth_client):
+async def test_delete_board(auth_client: AsyncClient) -> None:
     await auth_client.post(
         "/api/v1/board/",
         json={
@@ -141,6 +140,6 @@ async def test_delete_board(auth_client):
     assert delete.status_code == 204
 
 
-async def test_board_delete_fail(auth_client):
+async def test_board_delete_fail(auth_client: AsyncClient) -> None:
     delete = await auth_client.delete("/api/v1/board/10000")
     assert delete.status_code == 404

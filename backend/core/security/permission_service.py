@@ -1,19 +1,21 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
 from uuid import UUID
+
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.core.exceptions.board_exceptions import (
+    BoardNotFound,
+    BoardPermissionDenied,
+)
 from backend.core.utility.role_enum import RoleEnum
 from backend.models.models import BoardMembers, Boards
-from backend.core.exceptions.board_exceptions import (
-    BoardPermissionDenied,
-    BoardNotFound,
-)
 
 
 class PermissionService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def chech_user_board_role(
+    async def check_user_board_role(
         self,
         user_id: UUID,
         board_id: int,
@@ -39,6 +41,4 @@ class PermissionService:
             return True
         if role in required_roles:
             return True
-        raise BoardPermissionDenied(
-            "You dont have required permission"
-        )
+        raise BoardPermissionDenied("You dont have required permission")

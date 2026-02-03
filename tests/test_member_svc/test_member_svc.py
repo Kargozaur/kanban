@@ -1,8 +1,13 @@
+from typing import Any
+
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.fixture
-async def two_members(auth_client, second_auth_client):
+async def two_members(
+    auth_client: AsyncClient, second_auth_client: AsyncClient
+) -> dict[str, Any]:
     data = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -27,7 +32,9 @@ async def two_members(auth_client, second_auth_client):
     }
 
 
-async def test_adding_user(auth_client, second_auth_client):
+async def test_adding_user(
+    auth_client: AsyncClient, second_auth_client: AsyncClient
+) -> None:
     data = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -46,7 +53,9 @@ async def test_adding_user(auth_client, second_auth_client):
     assert result.status_code == 201
 
 
-async def test_adding_user_as_admin(auth_client, second_auth_client):
+async def test_adding_user_as_admin(
+    auth_client: AsyncClient, second_auth_client: AsyncClient
+) -> None:
     data = await auth_client.post(
         "/api/v1/board/",
         json={
@@ -65,7 +74,7 @@ async def test_adding_user_as_admin(auth_client, second_auth_client):
     assert result.status_code == 409
 
 
-async def test_updating_user(two_members):
+async def test_updating_user(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
     result = await client.patch(
         f"/api/v1/board/{two_members['board_id']}/members/update",
@@ -74,7 +83,7 @@ async def test_updating_user(two_members):
     assert result.status_code == 200
 
 
-async def test_updating_unknown_user(two_members):
+async def test_updating_unknown_user(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
     result = await client.patch(
         f"/api/v1/board/{two_members['board_id']}/members/update",
@@ -83,7 +92,7 @@ async def test_updating_unknown_user(two_members):
     assert result.status_code == 404
 
 
-async def test_updating_user_to_admin(two_members):
+async def test_updating_user_to_admin(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
     result = await client.patch(
         f"/api/v1/board/{two_members['board_id']}/members/update",
@@ -92,7 +101,7 @@ async def test_updating_user_to_admin(two_members):
     assert result.status_code == 409
 
 
-async def test_delete_user(two_members):
+async def test_delete_user(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
     email = two_members["member_email"]
     result = await client.delete(
@@ -101,7 +110,7 @@ async def test_delete_user(two_members):
     assert result.status_code == 204
 
 
-async def test_unknown_user(two_members):
+async def test_unknown_user(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
     result = await client.delete(
         f"/api/v1/board/{two_members['board_id']}/members/delete_member/unknown@example.com",

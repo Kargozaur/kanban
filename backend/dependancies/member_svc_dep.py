@@ -1,8 +1,10 @@
-from fastapi import Depends
-from backend.services.services.member_service import MemberService
-from backend.dependancies.uow_dep import UOWDep
 from typing import Annotated
+
+from fastapi import Depends
 from typing_extensions import Doc
+
+from backend.dependancies.uow_dep import UOWDep
+from backend.services.services.member_service import MemberService
 
 
 def get_member_svc(uow: UOWDep) -> MemberService:

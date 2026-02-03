@@ -1,17 +1,16 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 class DatabaseProvider:
     """Database provider for the lifespan"""
 
-    def __init__(
-        self, sessionmaker: async_sessionmaker[AsyncSession]
-    ) -> None:
+    def __init__(self, sessionmaker: async_sessionmaker[AsyncSession]) -> None:
         self.sessionmaker = sessionmaker
 
     async def session_generator(
         self,
-    ) -> AsyncGenerator[AsyncSession, None]:
+    ) -> AsyncGenerator[AsyncSession]:
         async with self.sessionmaker() as session:
             yield session

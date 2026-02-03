@@ -1,7 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from pydantic import BaseModel
 from typing import Any
+
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BaseRepository[
@@ -9,15 +10,11 @@ class BaseRepository[
     CreateSchemaT: BaseModel,
     UpdateSchemaT: BaseModel = None,
 ]:
-    def __init__(
-        self, session: AsyncSession, model: type[ModelT]
-    ) -> None:
+    def __init__(self, session: AsyncSession, model: type[ModelT]) -> None:
         self.session = session
         self.model = model
 
-    async def create(
-        self, data: CreateSchemaT, **extra_fields: Any
-    ) -> ModelT:
+    async def create(self, data: CreateSchemaT, **extra_fields: object) -> ModelT:
         payload: dict[str, Any] = data.model_dump()
         payload.update(extra_fields)
         db_obj: ModelT = self.model(**payload)
@@ -26,13 +23,11 @@ class BaseRepository[
         return db_obj
 
     async def update(
-        self, data_to_update: UpdateSchemaT, **filters: Any
+        self, data_to_update: UpdateSchemaT, **filters: object
     ) -> None | ModelT:
         query = select(self.model).filter_by(**filters)
         existing_field = await self.session.execute(query)
-        if not (
-            current_object := existing_field.scalar_one_or_none()
-        ):
+        if not (current_object := existing_field.scalar_one_or_none()):
             return None
         update_data: dict[str, Any] = data_to_update.model_dump(
             exclude_unset=True, exclude={"id", "user_id"}
@@ -43,7 +38,7 @@ class BaseRepository[
         await self.session.flush()
         return current_object
 
-    async def delete(self, **composite_key: Any) -> None | bool:
+    async def delete(self, **composite_key: object) -> None | bool:
         query = select(self.model).filter_by(**composite_key)
         result = await self.session.execute(query)
         existing_field = result.scalar_one_or_none()

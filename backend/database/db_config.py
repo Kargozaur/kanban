@@ -1,9 +1,10 @@
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    create_async_engine,
-    async_sessionmaker,
     AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
 )
+
 from backend.core.settings.settings import AppSettings
 
 

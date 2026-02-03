@@ -1,24 +1,24 @@
 from fastapi import APIRouter
-from backend.core.utility.role_enum import RoleEnum
-from backend.dependancies.board_svc_dep import BoardSvcDep
-from backend.dependancies.permission_dep import CurrentUserDep
-from backend.dependancies.annotated_types import PaginationDep
-from backend.dependancies.permission_dep import PermissionDep
-from backend.api.v1.board_router_ext.member_router import (
-    create_member_router,
-)
+
 from backend.api.v1.board_router_ext.columns_router import (
     create_columns_router,
 )
+from backend.api.v1.board_router_ext.member_router import (
+    create_member_router,
+)
+from backend.core.utility.role_enum import RoleEnum
+from backend.dependancies.annotated_types import PaginationDep
+from backend.dependancies.board_svc_dep import BoardSvcDep
+from backend.dependancies.permission_dep import CurrentUserDep, PermissionDep
 from backend.schemas.board_schema import (
     BoardCreate,
-    BoardUpdate,
-    BoardGet,
     BoardFullView,
+    BoardGet,
+    BoardUpdate,
 )
 
 
-def create_board_router():
+def create_board_router() -> APIRouter:
     board_router = APIRouter(prefix="/board", tags=["Board"])
     board_router.include_router(create_member_router())
     board_router.include_router(create_columns_router())
@@ -61,30 +61,28 @@ def create_board_router():
     async def get_full_board(
         id: int, board_svc: BoardSvcDep, current_user: CurrentUserDep
     ) -> BoardFullView:
-        return await board_svc.get_board(
-            user_id=current_user.id, id=id
-        )
+        return await board_svc.get_board(user_id=current_user.id, id=id)
 
     @board_router.patch(
         "/{board_id}",
         status_code=200,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
-        description="Updates board based on data provided. User has to have admin role to perform this action",
+        description="Updates board based on data provided. User has to have admin role"
+        "to perform this action",
     )
     async def update_board(
         board_id: int, board_svc: BoardSvcDep, new_data: BoardUpdate
     ) -> BoardGet:
-        return await board_svc.update_board(
-            board_id=board_id, data_to_update=new_data
-        )
+        return await board_svc.update_board(board_id=board_id, data_to_update=new_data)
 
     @board_router.delete(
         "/{board_id}",
         status_code=204,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
-        description="Deletes board. User has to have an admin role to perform this action",
+        description="Deletes board. User has to have an admin role to perform"
+        "this action",
     )
-    async def delete_board(board_id: int, board_svc: BoardSvcDep):
+    async def delete_board(board_id: int, board_svc: BoardSvcDep) -> None:
         await board_svc.delete_board(board_id)
 
     return board_router

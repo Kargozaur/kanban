@@ -1,9 +1,10 @@
 from fastapi import APIRouter
+
 from backend.api.v1.auth_router import create_auth_router
 from backend.api.v1.board_router import create_board_router
 
 
-def create_api_router():
+def create_api_router() -> APIRouter:
     api_router = APIRouter(prefix="/api")
     v1_router = APIRouter(prefix="/v1", tags=["v1"])
     v1_router.include_router(create_auth_router())

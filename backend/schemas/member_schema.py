@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
-from backend.core.utility.role_enum import RoleEnum
 from typing import Annotated
 from uuid import UUID
+
+from pydantic import BaseModel, Field
+
+from backend.core.utility.role_enum import RoleEnum
 from backend.schemas.generic import GenericId
 
 
@@ -37,9 +39,7 @@ class AddBoardMemberEmail(AddBoardMemberBase):
 
 
 class AddBoardMemberUUID(AddBoardMemberBase):
-    user_id: Annotated[
-        UUID, Field(..., description="User's id from the database")
-    ]
+    user_id: Annotated[UUID, Field(..., description="User's id from the database")]
 
 
 class UpdateBoardMember(EmailBase):
@@ -61,3 +61,7 @@ class UpdateMemberWithId(GenericId[int]):
             description="Changes the role of the user inside the board",
         ),
     ]
+
+
+class MemberResponse(BaseModel):
+    message: str

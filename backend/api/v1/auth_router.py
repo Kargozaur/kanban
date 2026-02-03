@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Response, Request
-from backend.dependancies.user_dep import UserSvcDep
-from backend.dependancies.auth_dep import CurrentUserDep
+from fastapi import APIRouter, Request, Response
+
 from backend.dependancies.annotated_types import FormData
+from backend.dependancies.auth_dep import CurrentUserDep
+from backend.dependancies.user_dep import UserSvcDep
+from backend.models.models import User
 from backend.schemas.token_schema import TokenResponse
 from backend.schemas.user_schema import (
     UserCredentials,
@@ -10,7 +12,7 @@ from backend.schemas.user_schema import (
 )
 
 
-def create_auth_router():
+def create_auth_router() -> APIRouter:
     user_auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
     @user_auth_router.post(
@@ -28,7 +30,8 @@ def create_auth_router():
     @user_auth_router.post(
         "/login",
         status_code=201,
-        description="Compares user credentials. If credentials right, returns a JWT token. \n"
+        description="Compares user credentials. If credentials right, \n"
+        "returns a JWT token."
         "Username field expects users email.",
     )
     async def login(
@@ -56,14 +59,12 @@ def create_auth_router():
     @user_auth_router.post("/logout")
     async def logout(
         response: Response, current_user: CurrentUserDep
-    ):
-        response.delete_cookie(
-            key="access_token", httponly=True, samesite="lax"
-        )
+    ) -> dict[str, str]:
+        response.delete_cookie(key="access_token", httponly=True, samesite="lax")
         return {"message": "Succesfully logged out"}
 
     @user_auth_router.get("/me", response_model=UserGet)
-    async def get_me(current_user: CurrentUserDep):
+    async def get_me(current_user: CurrentUserDep) -> User:
         return current_user
 
     return user_auth_router

@@ -1,18 +1,22 @@
+from collections.abc import Awaitable
+from typing import cast
+
+from anyio.to_thread import run_sync
+
+from backend.core.decorators.transactional import transactional
+from backend.core.exceptions.exceptions import (
+    NotFoundError,
+    UserAlreadyExists,
+)
+from backend.core.security.password_hasher import PasswordHasher
+from backend.core.security.token_svc import TokenSvc
+from backend.database.unit_of_work import UnitOfWork
+from backend.schemas.token_schema import TokenResponse
 from backend.schemas.user_schema import (
     UserCredentials,
     UserGet,
     UserLogin,
 )
-from backend.core.decorators.transactional import transactional
-from backend.schemas.token_schema import TokenResponse
-from backend.core.security.password_hasher import PasswordHasher
-from backend.core.security.token_svc import TokenSvc
-from backend.database.unit_of_work import UnitOfWork
-from backend.core.exceptions.exceptions import (
-    NotFoundError,
-    UserAlreadyExists,
-)
-import anyio
 
 
 class UserService:
@@ -34,15 +38,9 @@ class UserService:
         self.token_service = token_service
 
     @transactional
-    async def create_user(
-        self, user_credential: UserCredentials
-    ) -> UserGet:
-        hashed_password = self.password_hasher.hash_password(
-            user_credential.password
-        )
-        updated_model = user_credential.model_copy(
-            update={"password": hashed_password}
-        )
+    async def create_user(self, user_credential: UserCredentials) -> UserGet:
+        hashed_password = self.password_hasher.hash_password(user_credential.password)
+        updated_model = user_credential.model_copy(update={"password": hashed_password})
 
         user_orm = await self.uow.users.create_user(updated_model)
 
@@ -53,26 +51,23 @@ class UserService:
         return result
 
     @transactional
-    async def login_user(
-        self, user_credential: UserLogin
-    ) -> TokenResponse:
+    async def login_user(self, user_credential: UserLogin) -> TokenResponse:
         if not (
-            check_if_exists := await self.uow.users.get_user_data(
-                user_credential.email
-            )
+            check_if_exists := await self.uow.users.get_user_data(user_credential.email)
         ):
             raise NotFoundError()
-        is_password_correct = await anyio.to_thread.run_sync(
-            self.password_hasher.verify_password,
-            user_credential.password,
-            check_if_exists.password,
+        is_password_correct = await cast(
+            Awaitable[bool],
+            run_sync(
+                self.password_hasher.verify_password,
+                user_credential.password,
+                check_if_exists.password,
+            ),
         )
         if not is_password_correct:
             raise NotFoundError()
-        access_token = self.token_service.create_token(
-            check_if_exists
-        )
-        token = {
+        access_token = await self.token_service.create_token(check_if_exists)
+        token: dict[str, str] = {
             "access_token": access_token,
             "token_type": "Bearer",
         }

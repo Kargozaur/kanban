@@ -1,14 +1,16 @@
 from fastapi import APIRouter
+
 from backend.core.utility.role_enum import RoleEnum
 from backend.dependancies.member_svc_dep import MemberSvcDep
 from backend.dependancies.permission_dep import PermissionDep
 from backend.schemas.member_schema import (
     AddBoardMemberEmail,
+    MemberResponse,
     UpdateBoardMember,
 )
 
 
-def create_member_router():
+def create_member_router() -> APIRouter:
     member_router = APIRouter(
         prefix="/{board_id}/members", tags=["Board", "BoardMembers"]
     )
@@ -24,7 +26,7 @@ def create_member_router():
         board_id: int,
         user_data: AddBoardMemberEmail,
         member_svc: MemberSvcDep,
-    ):
+    ) -> MemberResponse:
         return await member_svc.add_member_to_the_board(
             board_id=board_id, user_data=user_data
         )
@@ -40,7 +42,7 @@ def create_member_router():
         board_id: int,
         update_member: UpdateBoardMember,
         member_svc: MemberSvcDep,
-    ):
+    ) -> MemberResponse:
         return await member_svc.update_user_role(
             board_id=board_id, user_data=update_member
         )
@@ -56,9 +58,7 @@ def create_member_router():
         board_id: int,
         email: str,
         member_svc: MemberSvcDep,
-    ):
-        await member_svc.delete_user_from_the_board(
-            board_id=board_id, user_email=email
-        )
+    ) -> None:
+        await member_svc.delete_user_from_the_board(board_id=board_id, user_email=email)
 
     return member_router

@@ -1,6 +1,7 @@
+from collections.abc import AsyncIterator
+
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import AsyncIterator
 
 
 async def get_db(

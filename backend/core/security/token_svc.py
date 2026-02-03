@@ -1,7 +1,10 @@
-from backend.core.settings.settings import AppSettings
-from datetime import datetime, timedelta, timezone
-from backend.models.models import User
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
 import jwt
+
+from backend.core.settings.settings import AppSettings
+from backend.models.models import User
 
 
 class TokenSvc:
@@ -10,11 +13,9 @@ class TokenSvc:
         self.algo = settings.token.algorithm
         self.access_ttl = settings.token.token_ttl
 
-    def create_token(self, user: User) -> str:
-        to_encode: dict[str, str] = {"sub": str(user.id)}
-        expire: datetime = datetime.now(tz=timezone.utc) + timedelta(
-            minutes=self.access_ttl
-        )
+    async def create_token(self, user: User) -> str:
+        to_encode: dict[str, Any] = {"sub": str(user.id)}
+        expire: datetime = datetime.now(tz=UTC) + timedelta(minutes=self.access_ttl)
         to_encode.update({"exp": expire})
         encoded: str = jwt.encode(
             payload=to_encode, key=self.secret, algorithm=self.algo
@@ -22,5 +23,5 @@ class TokenSvc:
         return encoded
 
 
-def get_token_svc(settings) -> TokenSvc:
+def get_token_svc(settings: AppSettings) -> TokenSvc:
     return TokenSvc(settings)

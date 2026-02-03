@@ -1,6 +1,8 @@
-from pydantic import Field, PostgresDsn
 from typing import Annotated
+
+from pydantic import Field, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 Port = Annotated[int, Field(..., ge=1, le=65535)]
 Driver = Annotated[str, Field(default="asyncpg")]

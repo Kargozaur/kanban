@@ -1,24 +1,25 @@
+import logging
+from collections.abc import Sequence
+from uuid import UUID
+
+from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, Select
-from backend.models.models import Boards, BoardMembers, Columns
-from backend.schemas.pagination_schema import Pagination
+
 from backend.core.utility.role_enum import RoleEnum
+from backend.models.models import BoardMembers, Boards, Columns
 from backend.schemas.board_schema import (
     BoardCreate,
     BoardUpdate,
 )
-from uuid import UUID
-import logging
-from typing import Sequence
+from backend.schemas.pagination_schema import Pagination
 from backend.services.repositories.generic_repo import BaseRepository
+
 
 logger = logging.getLogger(__name__)
 
 
-class BoardRepository(
-    BaseRepository[Boards, BoardCreate, BoardUpdate]
-):
+class BoardRepository(BaseRepository[Boards, BoardCreate, BoardUpdate]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Boards)
 
@@ -36,9 +37,7 @@ class BoardRepository(
             query = query.where(Boards.id == id)
         return query
 
-    async def create_board(
-        self, owner_id: UUID, board_data: BoardCreate
-    ) -> Boards:
+    async def create_board(self, owner_id: UUID, board_data: BoardCreate) -> Boards:
         """
         Creates a new entity within a Boards table and BoardMembers. \n
         Sets owner as admin
@@ -76,16 +75,12 @@ class BoardRepository(
             Sequence[Boards] or []
         """
         query = self._select_query_builder(user_id=user_id)
-        query = query.limit(pagination.limit).offset(
-            pagination.offset
-        )
+        query = query.limit(pagination.limit).offset(pagination.offset)
         result = await self.session.execute(query)
         rows: Sequence[Boards] = result.scalars().all()
         return rows
 
-    async def get_board(
-        self, user_id: UUID, id: int
-    ) -> Boards | None:
+    async def get_board(self, user_id: UUID, id: int) -> Boards | None:
         """
         Get full info about the board
         Args:
@@ -97,9 +92,7 @@ class BoardRepository(
         """
         query = self._select_query_builder(user_id=user_id, id=id)
         query = query.options(
-            selectinload(Boards.board_members).joinedload(
-                BoardMembers.user
-            ),
+            selectinload(Boards.board_members).joinedload(BoardMembers.user),
             selectinload(Boards.columns).selectinload(Columns.tasks),
         )
         logging.info(f"DEBUG - pre-result query = {query}")
@@ -113,7 +106,8 @@ class BoardRepository(
         self, board_id: int, data_to_update: BoardUpdate
     ) -> Boards | None:
         """
-        Updates Boards table. User has to have Admin role. Role is managed inside the endpoint
+        Updates Boards table. User has to have Admin role. Role is managed inside
+        the endpoint
         Args:
             id (int): id of the table
             data_to_update (BoardUpdate): Pydantic BoardUpdate schema
@@ -122,9 +116,7 @@ class BoardRepository(
            None | updated_board
         """
         if not (
-            board := await super().update(
-                data_to_update=data_to_update, id=board_id
-            )
+            board := await super().update(data_to_update=data_to_update, id=board_id)
         ):
             return None
         return board

@@ -1,11 +1,13 @@
-from pydantic import BaseModel, ConfigDict, Field
-from uuid import UUID
 from datetime import datetime
-from typing import Annotated
-from backend.core.utility.role_enum import RoleEnum
-from backend.schemas.user_schema import UserGetForTotal
-from backend.schemas.generic import GenericId
 from decimal import Decimal
+from typing import Annotated
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from backend.core.utility.role_enum import RoleEnum
+from backend.schemas.generic import GenericId
+from backend.schemas.user_schema import UserGetForTotal
 
 
 class BoardCreate(BaseModel):
@@ -16,7 +18,8 @@ class BoardCreate(BaseModel):
             min_length=1,
             max_length=100,
             title="Board Name",
-            description="The display name of the kanban board. must be unique for the user",
+            description="The display name of the kanban board. "
+            "Must be unique for the user",
         ),
     ]
     description: Annotated[
@@ -25,9 +28,7 @@ class BoardCreate(BaseModel):
             default="",
             max_length=200,
             description="Long form explonation of the board purpose",
-            examples=[
-                "This board tracks the development of the new app"
-            ],
+            examples=["This board tracks the development of the new app"],
         ),
     ]
 
@@ -80,11 +81,7 @@ class BoardFullView(GenericId[int]):
     owner_id: UUID
     created_at: datetime
 
-    board_members: Annotated[
-        list[MemberView], Field(default_factory=list)
-    ]
-    columns: Annotated[
-        list[ColumnBoardView], Field(default_factory=list)
-    ]
+    board_members: Annotated[list[MemberView], Field(default_factory=list)]
+    columns: Annotated[list[ColumnBoardView], Field(default_factory=list)]
 
     model_config = ConfigDict(from_attributes=True)

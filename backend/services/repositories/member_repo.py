@@ -1,20 +1,18 @@
-from sqlalchemy import select, Select, exists
+from uuid import UUID
+
+from sqlalchemy import Select, exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.models.models import BoardMembers
+
 from backend.core.utility.role_enum import RoleEnum
-from backend.services.repositories.generic_repo import BaseRepository
+from backend.models.models import BoardMembers
 from backend.schemas.member_schema import (
     AddBoardMemberUUID,
     UpdateMemberWithId,
 )
-from uuid import UUID
+from backend.services.repositories.generic_repo import BaseRepository
 
 
-class MemberRepo(
-    BaseRepository[
-        BoardMembers, AddBoardMemberUUID, UpdateMemberWithId
-    ]
-):
+class MemberRepo(BaseRepository[BoardMembers, AddBoardMemberUUID, UpdateMemberWithId]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, BoardMembers)
 
@@ -26,9 +24,7 @@ class MemberRepo(
             BoardMembers.board_id == board_id,
         )
 
-    def _membership_record_builder(
-        self, board_id: int, user_id: UUID
-    ) -> Select:
+    def _membership_record_builder(self, board_id: int, user_id: UUID) -> Select:
         return select(
             exists().where(
                 BoardMembers.board_id == board_id,
@@ -36,13 +32,9 @@ class MemberRepo(
             )
         )
 
-    async def _existing_user(
-        self, board_id: int, user_id: UUID
-    ) -> bool:
+    async def _existing_user(self, board_id: int, user_id: UUID) -> bool:
         result = await self.session.execute(
-            self._membership_record_builder(
-                board_id=board_id, user_id=user_id
-            )
+            self._membership_record_builder(board_id=board_id, user_id=user_id)
         )
         return bool(result.scalar())
 
@@ -59,9 +51,7 @@ class MemberRepo(
         Returns:
             scalar result | None
         """
-        query = self._query_builder(
-            board_id=board_id, user_id=user_id
-        )
+        query = self._query_builder(board_id=board_id, user_id=user_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
@@ -124,8 +114,6 @@ class MemberRepo(
         Returns:
             bool
         """
-        if not (
-            await super().delete(board_id=board_id, user_id=user_id)
-        ):
+        if not (await super().delete(board_id=board_id, user_id=user_id)):
             return None
         return True

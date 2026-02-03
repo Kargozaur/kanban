@@ -1,5 +1,5 @@
 import pytest
-import pytest_asyncio
+from httpx import AsyncClient
 
 
 @pytest.mark.parametrize(
@@ -10,7 +10,9 @@ import pytest_asyncio
         ("use2r@example.com", "CoolPoaa11@@", 201),
     ],
 )
-async def test_user_creation(email, password, status_code, client):
+async def test_user_creation(
+    email: str, password: str, status_code: int, client: AsyncClient
+) -> None:
     result = await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -33,8 +35,8 @@ async def test_user_creation(email, password, status_code, client):
     ],
 )
 async def test_registration_fail(
-    email, password, status_code, client
-):
+    email: str, password: str, status_code: int, client: AsyncClient
+) -> None:
     result = await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -52,7 +54,9 @@ async def test_registration_fail(
         ("user22@example.com", "Par@at#332", 201),
     ],
 )
-async def test_user_login(email, password, status_code, client):
+async def test_user_login(
+    email: str, password: str, status_code: int, client: AsyncClient
+) -> None:
     await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -81,8 +85,8 @@ async def test_user_login(email, password, status_code, client):
     ],
 )
 async def test_password(
-    email, password, bad_password, status_code, client
-):
+    email: str, password: str, bad_password: str, status_code: int, client: AsyncClient
+) -> None:
     await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -118,8 +122,8 @@ async def test_password(
     ],
 )
 async def test_email(
-    email, wrong_email, password, status_code, client
-):
+    email: str, wrong_email: str, password: str, status_code: int, client: AsyncClient
+) -> None:
     await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -137,7 +141,7 @@ async def test_email(
     assert result.status_code == status_code
 
 
-async def test_user_logout(client):
+async def test_user_logout(client: AsyncClient) -> None:
     await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -169,7 +173,9 @@ async def test_user_logout(client):
         ("user22@example.com", "Par@at#332", 200),
     ],
 )
-async def test_me(email, password, status_code, client):
+async def test_me(
+    email: str, password: str, status_code: int, client: AsyncClient
+) -> None:
     await client.post(
         "/api/v1/auth/sign_up",
         json={
@@ -191,12 +197,12 @@ async def test_me(email, password, status_code, client):
     assert data["email"] == email
 
 
-async def test_me_blank(client):
+async def test_me_blank(client: AsyncClient) -> None:
     result = await client.get("/api/v1/auth/me")
     assert result.status_code == 401
 
 
-async def test_me_without_login(client):
+async def test_me_without_login(client: AsyncClient) -> None:
     await client.post(
         "/api/v1/auth/sign_up",
         json={

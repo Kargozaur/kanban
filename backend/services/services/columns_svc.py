@@ -1,13 +1,13 @@
 from backend.core.decorators.read_only import read_only
 from backend.core.decorators.transactional import transactional
+from backend.core.exceptions.columns_exceptions import ColumnNotFound
 from backend.database.unit_of_work import UnitOfWork
 from backend.schemas.columns_schema import (
     ColumnCreate,
     ColumnGet,
-    ColumnUpdate,
     ColumnGetFull,
+    ColumnUpdate,
 )
-from backend.core.exceptions.columns_exceptions import ColumnNotFound
 
 
 class ColumnService:
@@ -15,9 +15,7 @@ class ColumnService:
         self.uow = uow
 
     @transactional
-    async def add_column(
-        self, board_id: int, column_data: ColumnCreate
-    ):
+    async def add_column(self, board_id: int, column_data: ColumnCreate) -> ColumnGet:
         result = await self.uow.columns.add_column(
             board_id=board_id, column_data=column_data
         )
@@ -35,7 +33,7 @@ class ColumnService:
     @transactional
     async def update_column(
         self, column_id: int, board_id: int, new_data: ColumnUpdate
-    ):
+    ) -> ColumnGet:
         if not (
             result := await self.uow.columns.update_column(
                 column_id=column_id,
@@ -43,16 +41,12 @@ class ColumnService:
                 new_data=new_data,
             )
         ):
-            raise ColumnNotFound(
-                f"Column with the id {column_id} not found"
-            )
+            raise ColumnNotFound(f"Column with the id {column_id} not found")
         return ColumnGet.model_validate(result)
 
     @transactional
-    async def drop_column(self, column_id: int, board_id: int):
+    async def drop_column(self, column_id: int, board_id: int) -> None:
         if not await self.uow.columns.drop_column(
             column_id=column_id, board_id=board_id
         ):
-            raise ColumnNotFound(
-                f"Column with the id {column_id} not found"
-            )
+            raise ColumnNotFound(f"Column with the id {column_id} not found")

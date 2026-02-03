@@ -10,6 +10,7 @@ dependencies = [
     "fastapi[all]>=0.128.0",
     "passlib[argon2]>=1.7.4",
     "pyjwt>=2.10.1",
+    "ruff>=0.15.0",
     "sqlalchemy[asyncio]>=2.0.46",
 ]
 
@@ -22,3 +23,16 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
+
+[too.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "ANN", "UP"]
+ignore = ["ANN101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["my_app"]
+combine-as-imports = true
+lines-after-imports = 2

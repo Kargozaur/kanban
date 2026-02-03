@@ -1,8 +1,11 @@
-from fastapi import Depends
-from backend.database.uow_provider import get_uow
-from backend.database.unit_of_work import UnitOfWork
 from typing import Annotated
+
+from fastapi import Depends
 from typing_extensions import Doc
+
+from backend.database.unit_of_work import UnitOfWork
+from backend.database.uow_provider import get_uow
+
 
 UOWDep = Annotated[
     UnitOfWork,

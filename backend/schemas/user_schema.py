@@ -1,16 +1,19 @@
+from typing import Annotated, Self
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     BeforeValidator,
-    EmailStr,
     ConfigDict,
-    model_validator,
+    EmailStr,
     Field,
+    model_validator,
 )
-from typing import Annotated
 from typing_extensions import Doc
+
 from backend.core.utility.password_verifier import verify_password
 from backend.schemas.generic import GenericId
-from uuid import UUID
+
 
 PasswordField = Annotated[
     str,
@@ -23,34 +26,22 @@ PasswordField = Annotated[
 
 
 class UserCredentials(BaseModel):
-    email: Annotated[
-        EmailStr, Field(..., examples=["user@example.com"])
-    ]
-    password: Annotated[
-        PasswordField, Field(examples=["SuperPassword!123"])
-    ]
-    name: Annotated[
-        str | None, Field(default=None, examples=["User Name"])
-    ]
+    email: Annotated[EmailStr, Field(..., examples=["user@example.com"])]
+    password: Annotated[PasswordField, Field(examples=["SuperPassword!123"])]
+    name: Annotated[str | None, Field(default=None, examples=["User Name"])]
 
     """validator in case if user didn't set their name"""
 
     @model_validator(mode="after")
-    def set_name_from_email(self):
+    def set_name_from_email(self) -> Self:
         if not self.name or not self.name.strip():
-            self.name = (
-                self.email.split("@")[0]
-                .replace("_", " ")
-                .replace(".", " ")
-            )
+            self.name = self.email.split("@")[0].replace("_", " ").replace(".", " ")
         return self
 
 
 class UserLogin(BaseModel):
     email: Annotated[str, Field(..., examples=["user@example.com"])]
-    password: Annotated[
-        str, Field(..., examples=["SuperPassword!123"])
-    ]
+    password: Annotated[str, Field(..., examples=["SuperPassword!123"])]
 
 
 class UserGetForTotal(BaseModel):

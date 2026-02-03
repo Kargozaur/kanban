@@ -1,6 +1,7 @@
 import logging
 from enum import StrEnum
 from typing import Final
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,12 +26,8 @@ FMT: Final[str] = (
 DATEFMT: Final[str] = "%Y-%m-%d %H:%M:%S"
 
 
-def configure_logging(
-    *, level: LoggingLevel = DEFAULT_LOG_LEVEL
-) -> None:
-    logging.basicConfig(
-        level=level, datefmt=DATEFMT, format=FMT, force=True
-    )
+def configure_logging(*, level: LoggingLevel = DEFAULT_LOG_LEVEL) -> None:
+    logging.basicConfig(level=level, datefmt=DATEFMT, format=FMT, force=True)
 
 
 class LoggingSettings(BaseSettings):
