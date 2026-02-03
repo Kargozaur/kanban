@@ -5,6 +5,7 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
+    synonym,
 )
 
 from sqlalchemy.types import String, UUID, DECIMAL
@@ -91,6 +92,8 @@ class BoardMembers(Base):
             "board_id", "user_id", name="uq_member_per_board"
         ),
     )
+
+    id: Mapped[int] = synonym("board_id")
 
 
 class Columns(IdMixin, Base):

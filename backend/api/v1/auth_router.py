@@ -36,7 +36,7 @@ def create_auth_router():
         response: Response,
         user_svc: UserSvcDep,
         form_data: FormData,
-    ) -> TokenResponse:
+    ) -> TokenResponse | dict[str, str]:
         existing_token = request.cookies.get("access_token")
         if existing_token:
             return {"message": "You are already logged in"}
@@ -62,8 +62,8 @@ def create_auth_router():
         )
         return {"message": "Succesfully logged out"}
 
-    @user_auth_router.get("/me")
-    async def get_me(current_user: CurrentUserDep) -> UserGet:
+    @user_auth_router.get("/me", response_model=UserGet)
+    async def get_me(current_user: CurrentUserDep):
         return current_user
 
     return user_auth_router
