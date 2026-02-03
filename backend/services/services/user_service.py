@@ -55,7 +55,7 @@ class UserService:
     @transactional
     async def login_user(
         self, user_credential: UserLogin
-    ) -> dict[str, str]:
+    ) -> TokenResponse:
         if not (
             check_if_exists := await self.uow.users.get_user_data(
                 user_credential.email

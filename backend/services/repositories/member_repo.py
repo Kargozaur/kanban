@@ -14,7 +14,7 @@ class MemberRepo:
 
     def _query_builder(
         self, board_id: int, user_id: UUID
-    ) -> Select[tuple(BoardMembers)]:
+    ) -> Select[BoardMembers]:
         return select(BoardMembers).where(
             BoardMembers.user_id == user_id,
             BoardMembers.board_id == board_id,

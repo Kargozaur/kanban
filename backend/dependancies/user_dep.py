@@ -6,6 +6,7 @@ from backend.dependancies.annotated_types import (
 from backend.dependancies.uow_dep import UOWDep
 from backend.services.services.user_service import UserService
 from typing import Annotated
+from typing_extensions import Doc
 
 
 def get_user_service(
@@ -16,4 +17,8 @@ def get_user_service(
     return UserService(uow, password_hasher, token_svc)
 
 
-UserSvcDep = Annotated[UserService, Depends(get_user_service)]
+UserSvcDep = Annotated[
+    UserService,
+    Depends(get_user_service),
+    Doc("Dependancy for the user service inside the auth router"),
+]

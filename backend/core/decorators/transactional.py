@@ -6,6 +6,10 @@ logger = logging.getLogger(__name__)
 
 
 def transactional(func):
+    """Decorator for the services that are dependant on the unit of work.
+    Should be used only on the methods, that are requiring commits or rollbacks.
+    """
+
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
         if not hasattr(self, "uow"):

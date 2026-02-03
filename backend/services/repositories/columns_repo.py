@@ -39,7 +39,8 @@ class ColumnsRepo:
 
     async def get_column_with_tasks(
         self, column_id: int, board_id: int
-    ):
+    ) -> Columns | None:
+        """Get full info about the column(tasks and column info)"""
         query = self._query_builder(
             column_id=column_id, board_id=board_id
         )
@@ -50,6 +51,7 @@ class ColumnsRepo:
     async def add_column(
         self, board_id: int, column_data: ColumnCreate
     ) -> Columns:
+        """Creates a new column. If position is not set, sets max position + 1"""
         if not column_data.position:
             column_data.position = await self._new_column_position(
                 board_id=board_id
@@ -68,6 +70,9 @@ class ColumnsRepo:
     async def update_column(
         self, column_id: int, board_id: int, new_data: ColumnUpdate
     ) -> None | Columns:
+        """
+        Tries to update column. If columnt not found, returns None
+        """
         if not (
             column := await self._get_column(
                 column_id=column_id, board_id=board_id
@@ -87,6 +92,7 @@ class ColumnsRepo:
     async def drop_column(
         self, column_id: int, board_id: int
     ) -> None | True:
+        """Tries to delete the column. If column not found, returns None"""
         if not (
             column := await self._get_column(
                 column_id=column_id, board_id=board_id

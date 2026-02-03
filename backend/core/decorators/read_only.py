@@ -6,6 +6,10 @@ logger = logging.getLogger(__name__)
 
 
 def read_only(func):
+    """Decorator for the services that are dependant on the unit of work.
+    This decorator only executes get requests.
+    """
+
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
         if not hasattr(self, "uow"):
