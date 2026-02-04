@@ -1,5 +1,4 @@
-from collections.abc import Awaitable
-from typing import Any, cast
+from typing import Any
 
 from anyio.to_thread import run_sync
 
@@ -58,13 +57,10 @@ class UserService:
             check_if_exists := await self.uow.users.get_user_data(user_credential.email)
         ):
             raise NotFoundError()
-        is_password_correct = await cast(
-            Awaitable[bool],
-            run_sync(
-                self.password_hasher.verify_password,
-                user_credential.password,
-                check_if_exists.password,
-            ),
+        is_password_correct: bool = await run_sync(
+            self.password_hasher.verify_password,
+            user_credential.password,
+            check_if_exists.password,
         )
         if not is_password_correct:
             raise NotFoundError()
