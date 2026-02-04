@@ -5,8 +5,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.schemas.generic import GenericId
 
-class TaskView(BaseModel):
+
+class TaskView(GenericId[int]):
     title: str
     description: str
     position: Decimal
@@ -14,7 +16,7 @@ class TaskView(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CreateTask(BaseModel):
+class CreateTaskBase(BaseModel):
     title: Annotated[
         str, Field(..., min_length=1, max_length=70, examples=["Add test"])
     ]
@@ -26,6 +28,9 @@ class CreateTask(BaseModel):
         Decimal | None,
         Field(..., gt=0, max_digits=20, decimal_places=10),
     ]
+
+
+class CreateTask(CreateTaskBase):
     assignee_id: Annotated[
         UUID | None,
         Field(

@@ -6,6 +6,7 @@ from backend.api.v1.board_router_ext.columns_router import (
 from backend.api.v1.board_router_ext.member_router import (
     create_member_router,
 )
+from backend.api.v1.board_router_ext.tasks_router import create_tasks_router
 from backend.core.utility.role_enum import RoleEnum
 from backend.dependancies.annotated_types import PaginationDep
 from backend.dependancies.board_svc_dep import BoardSvcDep
@@ -22,6 +23,7 @@ def create_board_router() -> APIRouter:
     board_router = APIRouter(prefix="/board", tags=["Board"])
     board_router.include_router(create_member_router())
     board_router.include_router(create_columns_router())
+    board_router.include_router(create_tasks_router())
 
     @board_router.post(
         "/",

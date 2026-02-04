@@ -4,48 +4,58 @@ from backend.core.decorators.read_only import read_only
 from backend.core.decorators.transactional import transactional
 from backend.core.exceptions.board_exceptions import BoardNotFound
 from backend.core.exceptions.columns_exceptions import ColumnNotFound
+from backend.core.exceptions.exceptions import NotFoundError
 from backend.core.exceptions.tasks_exception import (
     TaskConflict,
     TaskCreationFail,
     TaskNotFound,
 )
 from backend.database.unit_of_work import UnitOfWork
-from backend.models.models import Columns
 from backend.schemas.board_schema import BoardTaskView
-from backend.schemas.tasks_schema import CreateTask, TaskView, UpdateTask
+from backend.schemas.tasks_schema import (
+    CreateTask,
+    CreateTaskBase,
+    TaskView,
+    UpdateTask,
+)
 
 
 class TasksService:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
 
+    async def _get_user_id(self, email: str) -> UUID:
+        result = await self.uow.users.get_user_by_email(email=email)
+        if result is None:
+            raise NotFoundError()
+        return result.id
+
     @transactional
     async def create_task(
         self,
         board_id: int,
         column_id: int,
-        task_data: CreateTask,
-        assignee_id: UUID | None = None,
+        task_data: CreateTaskBase,
+        email: str | None = None,
     ) -> TaskView:
-        columns_limit_checker: (
-            Columns | None
-        ) = await self.uow.columns.get_column_with_tasks(
-            column_id=column_id, board_id=board_id
-        )
-        if not columns_limit_checker:
-            raise ColumnNotFound(f"Column with the id {column_id} not found")
+        if not (
+            columns_limit_checker := await self.uow.columns.get_column_with_tasks(
+                column_id=column_id, board_id=board_id
+            )
+        ):
+            raise ColumnNotFound(f"Column with the id {column_id} is not found")
         if (
             columns_limit_checker.wip_limit is not None
             and len(columns_limit_checker.tasks) >= columns_limit_checker.wip_limit
         ):
             raise TaskConflict("You can not add more tasks to the column")
-
+        user_id: UUID | None = await self._get_user_id(email=email) if email else None
+        full_task_data = CreateTask(**task_data.model_dump(), assignee_id=user_id)
         if not (
             result := await self.uow.tasks.create_task(
                 board_id=board_id,
                 column_id=column_id,
-                assignee_id=assignee_id,
-                new_task=task_data,
+                new_task=full_task_data,
             )
         ):
             raise TaskCreationFail("Failed to create a task")

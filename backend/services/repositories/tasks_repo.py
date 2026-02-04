@@ -33,7 +33,6 @@ class TasksRepo(BaseRepository[Tasks, CreateTask, UpdateTask]):
         board_id: int,
         column_id: int,
         new_task: CreateTask,
-        assignee_id: UUID | None = None,
     ) -> Tasks:
         """Tries to create a task for the column
         Args:
@@ -50,7 +49,9 @@ class TasksRepo(BaseRepository[Tasks, CreateTask, UpdateTask]):
             current_max = await self.session.scalar(query) or Decimal("1.0")
             new_task.position = current_max
         result: Tasks = await super().create(
-            new_task, board_id=board_id, column_id=column_id, assignee_id=assignee_id
+            new_task,
+            board_id=board_id,
+            column_id=column_id,
         )
         return result
 
