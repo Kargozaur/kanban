@@ -1,5 +1,5 @@
 from collections.abc import Awaitable
-from typing import cast
+from typing import Any, cast
 
 from anyio.to_thread import run_sync
 
@@ -39,7 +39,9 @@ class UserService:
 
     @transactional
     async def create_user(self, user_credential: UserCredentials) -> UserGet:
-        hashed_password = self.password_hasher.hash_password(user_credential.password)
+        hashed_password = await run_sync(
+            self.password_hasher.hash_password, user_credential.password
+        )
         updated_model = user_credential.model_copy(update={"password": hashed_password})
 
         user_orm = await self.uow.users.create_user(updated_model)
@@ -67,7 +69,7 @@ class UserService:
         if not is_password_correct:
             raise NotFoundError()
         access_token = await self.token_service.create_token(check_if_exists)
-        token: dict[str, str] = {
+        token: dict[str, Any] = {
             "access_token": access_token,
             "token_type": "Bearer",
         }
