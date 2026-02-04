@@ -18,7 +18,9 @@ def create_tasks_router() -> APIRouter:
     )
 
     @tasks_router.post(
-        "/add_task", dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])]
+        "/add_task",
+        dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
+        status_code=201,
     )
     async def add_task(
         board_id: int,
@@ -36,6 +38,7 @@ def create_tasks_router() -> APIRouter:
         dependencies=[
             PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
         ],
+        status_code=200,
     )
     async def get_tasks_for_the_board(
         board_id: int, column_id: int, task_svc: TaskSvcDep
@@ -49,6 +52,7 @@ def create_tasks_router() -> APIRouter:
         dependencies=[
             PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
         ],
+        status_code=200,
     )
     async def get_single_task(
         board_id: int, column_id: int, task_id: int, task_svc: TaskSvcDep
@@ -58,7 +62,9 @@ def create_tasks_router() -> APIRouter:
         )
 
     @tasks_router.patch(
-        "/{task_id}", dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])]
+        "/{task_id}",
+        dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
+        status_code=200,
     )
     async def update_task(
         board_id: int,
@@ -72,7 +78,9 @@ def create_tasks_router() -> APIRouter:
         )
 
     @tasks_router.delete(
-        "/{task_id}", dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])]
+        "/{task_id}",
+        dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
+        status_code=204,
     )
     async def delete_task(
         board_id: int, column_id: int, task_id: int, task_svc: TaskSvcDep
