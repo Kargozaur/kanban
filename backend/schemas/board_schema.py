@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend.core.utility.role_enum import RoleEnum
 from backend.schemas.generic import GenericId
+from backend.schemas.tasks_schema import TaskView
 from backend.schemas.user_schema import UserGetForTotal
 
 
@@ -57,25 +58,15 @@ class MemberView(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class TaskBoardView(BaseModel):
-    title: str
-    description: str
-    priority: int
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class ColumnBoardView(BaseModel):
     name: str
     position: Decimal
-    tasks: list[TaskBoardView] = Field(default_factory=list)
+    tasks: list[TaskView] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class BoardFullView(GenericId[int]):
-    id: int
     name: str
     description: str
     owner_id: UUID
@@ -83,5 +74,12 @@ class BoardFullView(GenericId[int]):
 
     board_members: Annotated[list[MemberView], Field(default_factory=list)]
     columns: Annotated[list[ColumnBoardView], Field(default_factory=list)]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BoardTaskView(BaseModel):
+    board_name: Annotated[str, Field(alias="name")]
+    tasks: list[TaskView] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)

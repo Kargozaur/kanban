@@ -38,8 +38,8 @@ class BaseRepository[
         await self.session.flush()
         return current_object
 
-    async def delete(self, **composite_key: object) -> None | bool:
-        query = select(self.model).filter_by(**composite_key)
+    async def delete(self, **filters: object) -> None | bool:
+        query = select(self.model).filter_by(**filters)
         result = await self.session.execute(query)
         existing_field = result.scalar_one_or_none()
         if not existing_field:

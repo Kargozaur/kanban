@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.services.repositories.board_repo import BoardRepository
 from backend.services.repositories.columns_repo import ColumnsRepo
 from backend.services.repositories.member_repo import MemberRepo
+from backend.services.repositories.tasks_repo import TasksRepo
 from backend.services.repositories.user_repo import UserRepository
 
 
@@ -15,6 +16,7 @@ class UnitOfWork:
         self.boards = BoardRepository(self.session)
         self.member = MemberRepo(self.session)
         self.columns = ColumnsRepo(self.session)
+        self.tasks = TasksRepo(self.session)
 
     async def __aenter__(self) -> Self:
         return self

@@ -137,11 +137,10 @@ class Tasks(IdMixin, OwnedBy, CreatedAt, Base):
     assignee: Mapped[User] = relationship(
         "User",
         foreign_keys=[assignee_id],
-        lazy="selectin",
         back_populates="assigned_task",
     )
     boards: Mapped[Boards] = relationship(
-        "Boards", back_populates="tasks", foreign_keys=[board_id], lazy="selectin"
+        "Boards", back_populates="tasks", foreign_keys=[board_id]
     )
 
     user: Mapped[User] = relationship(

@@ -30,6 +30,7 @@ from backend.exceptions_handlers.pydantic_handler import (
 from backend.exceptions_handlers.sqlalchemy_exception_handler import (
     sqlalchemy_handler,
 )
+from backend.exceptions_handlers.tasks_exception_handler import tasks_exception_handler
 from backend.exceptions_handlers.user_handler import (
     user_exception_handler,
 )
@@ -56,6 +57,7 @@ def create_app() -> FastAPI:
     user_exception_handler(app)
     member_exception_handler(app)
     columns_exception_handler(app)
+    tasks_exception_handler(app)
     sqlalchemy_handler(app)
     app.include_router(create_api_router())
 
