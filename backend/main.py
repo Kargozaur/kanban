@@ -47,7 +47,7 @@ def create_app() -> FastAPI:
         description="""
         FastAPI backend for the Kanban app.
         App handles JWT authentication. Role management based on the
-        FastAPI dependancies,
+        FastAPI dependencies,
         full CRUD operations on kanban boards.
     """,
     )

@@ -441,7 +441,6 @@ dependencies = [
     { name = "fastapi", extra = ["all"] },
     { name = "passlib", extra = ["argon2"] },
     { name = "pyjwt" },
-    { name = "ruff" },
     { name = "sqlalchemy", extra = ["asyncio"] },
 ]
 
@@ -449,6 +448,7 @@ dependencies = [
 dev = [
     { name = "aiosqlite" },
     { name = "pytest-asyncio" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -458,7 +458,6 @@ requires-dist = [
     { name = "fastapi", extras = ["all"], specifier = ">=0.128.0" },
     { name = "passlib", extras = ["argon2"], specifier = ">=1.7.4" },
     { name = "pyjwt", specifier = ">=2.10.1" },
-    { name = "ruff", specifier = ">=0.15.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.46" },
 ]
 
@@ -466,6 +465,7 @@ requires-dist = [
 dev = [
     { name = "aiosqlite", specifier = ">=0.22.1" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
+    { name = "ruff", specifier = ">=0.15.0" },
 ]
 
 [[package]]

@@ -45,12 +45,6 @@ class ColumnsRepo(BaseRepository[Columns, ColumnCreate, ColumnUpdate]):
         """Creates a new column. If position is not set, sets max position + 1"""
         if not column_data.position:
             column_data.position = await self._new_column_position(board_id=board_id)
-        # new_column = Columns(
-        #     board_id=board_id,
-        #     name=column_data.name,
-        #     position=column_data.position,
-        #     wip_limit=column_data.wip_limit,
-        # )
         new_column = await super().create(column_data, board_id=board_id)
 
         return new_column

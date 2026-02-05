@@ -6,8 +6,8 @@ from typing_extensions import Doc
 
 from backend.core.exceptions.exceptions import InvalidCredentialsError
 from backend.core.security.user_auth import AuthService
-from backend.dependancies.annotated_types import SettingsDep
-from backend.dependancies.db_dep import DBDep
+from backend.dependencies.annotated_types import SettingsDep
+from backend.dependencies.db_dep import DBDep
 from backend.models.models import User
 
 
@@ -37,7 +37,7 @@ CurrentUserDep = Annotated[
     User,
     Depends(current_user_dep),
     Doc(
-        "Dependancy of the AuthService to verify the current user."
+        "dependency of the AuthService to verify the current user."
         "Depends on SettingsDep, DBDep"
     ),
 ]

@@ -1,18 +1,18 @@
 from fastapi import Depends
-from fastapi.params import Depends as DependancyInstance
+from fastapi.params import Depends as dependencyInstance
 
 from backend.core.security.permission_service import PermissionService
 from backend.core.utility.role_enum import RoleEnum
-from backend.dependancies.auth_dep import CurrentUserDep
-from backend.dependancies.db_dep import DBDep
+from backend.dependencies.auth_dep import CurrentUserDep
+from backend.dependencies.db_dep import DBDep
 
 
-def PermissionDep(required_roles: list[RoleEnum] | RoleEnum) -> DependancyInstance:
+def PermissionDep(required_roles: list[RoleEnum] | RoleEnum) -> dependencyInstance:
     """
-    Permission Dependancy for the requests, related to the endpoints. \n
+    Permission dependency for the requests, related to the endpoints. \n
     Manages BoardMembers table. Checks the of the user inside the table.
     It is managed inside the router like this : \n
-    @router.patch("/", dependancies=[PermissionDep(RoleEnum.ADMIN)])
+    @router.patch("/", dependencies=[PermissionDep(RoleEnum.ADMIN)])
     """
     if not isinstance(required_roles, list):
         required_roles = [required_roles]

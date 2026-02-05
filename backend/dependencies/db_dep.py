@@ -10,5 +10,5 @@ from backend.database.session_provider import get_db
 DBDep = Annotated[
     AsyncSession,
     Depends(get_db),
-    Doc("Dependancy for the database sessions. Relies on DatabaseProvider"),
+    Doc("dependency for the database sessions. Relies on DatabaseProvider"),
 ]

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Body
 
 from backend.core.utility.role_enum import RoleEnum
-from backend.dependancies.permission_dep import PermissionDep
-from backend.dependancies.service_dependancies.tasks_dep import TaskSvcDep
+from backend.dependencies.permission_dep import PermissionDep
+from backend.dependencies.service_dependencies.tasks_dep import TaskSvcDep
 from backend.schemas.board_schema import BoardTaskView
 from backend.schemas.tasks_schema import (
     CreateTaskBase,

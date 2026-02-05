@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request, Response
 
-from backend.dependancies.annotated_types import FormData
-from backend.dependancies.auth_dep import CurrentUserDep
-from backend.dependancies.service_dependancies.user_dep import UserSvcDep
+from backend.dependencies.annotated_types import FormData
+from backend.dependencies.auth_dep import CurrentUserDep
+from backend.dependencies.service_dependencies.user_dep import UserSvcDep
 from backend.models.models import User
 from backend.schemas.token_schema import TokenResponse
 from backend.schemas.user_schema import (
