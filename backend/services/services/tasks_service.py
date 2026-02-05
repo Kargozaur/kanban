@@ -91,7 +91,9 @@ class TasksService:
         user_id: UUID | None = None
         if email is not None:
             user_id: UUID = await self._get_user_id(email=email)
-        updated_data = UpdateTask(**new_data.model_dump(), assignee_id=user_id)
+        updated_data = UpdateTask(
+            **new_data.model_dump(exclude_unset=True), assignee_id=user_id
+        )
         if not (
             result := await self.uow.tasks.update_task(
                 board_id=board_id,
