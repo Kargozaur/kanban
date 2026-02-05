@@ -9,8 +9,8 @@ from backend.api.v1.board_router_ext.member_router import (
 from backend.api.v1.board_router_ext.tasks_router import create_tasks_router
 from backend.core.utility.role_enum import RoleEnum
 from backend.dependancies.annotated_types import PaginationDep
-from backend.dependancies.board_svc_dep import BoardSvcDep
 from backend.dependancies.permission_dep import CurrentUserDep, PermissionDep
+from backend.dependancies.service_dependancies.board_svc_dep import BoardSvcDep
 from backend.schemas.board_schema import (
     BoardCreate,
     BoardFullView,

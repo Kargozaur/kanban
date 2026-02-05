@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from backend.core.utility.role_enum import RoleEnum
-from backend.dependancies.columns_dep import ColumnSvcDep
 from backend.dependancies.permission_dep import PermissionDep
+from backend.dependancies.service_dependancies.columns_dep import ColumnSvcDep
 from backend.schemas.columns_schema import (
     ColumnCreate,
     ColumnGet,

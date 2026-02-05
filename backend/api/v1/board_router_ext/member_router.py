@@ -2,8 +2,8 @@ from fastapi import APIRouter
 
 from backend.core.utility.role_enum import RoleEnum
 from backend.dependancies.auth_dep import CurrentUserDep
-from backend.dependancies.member_svc_dep import MemberSvcDep
 from backend.dependancies.permission_dep import PermissionDep
+from backend.dependancies.service_dependancies.member_svc_dep import MemberSvcDep
 from backend.schemas.member_schema import (
     AddBoardMemberEmail,
     MemberResponse,
