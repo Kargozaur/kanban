@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import Select, exists, select
+from sqlalchemy import Select, exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.utility.role_enum import RoleEnum
@@ -55,6 +55,13 @@ class MemberRepo(BaseRepository[BoardMembers, AddBoardMemberUUID, UpdateMemberWi
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
+    async def _get_admin_count(self, board_id: int) -> int:
+        query = select(func.count()).where(
+            BoardMembers.board_id == board_id, BoardMembers.role == RoleEnum.ADMIN
+        )
+        result = await self.session.execute(query)
+        return result.scalar() or 0
+
     async def add_member(
         self, board_id: int, new_user_data: AddBoardMemberUUID
     ) -> None | bool | str:
@@ -92,18 +99,27 @@ class MemberRepo(BaseRepository[BoardMembers, AddBoardMemberUUID, UpdateMemberWi
         Returns:
             bool | str | str
         """
-        if member_data.role == RoleEnum.ADMIN:
+        current_member = await self.get_entity(
+            board_id=member_data.id, user_id=member_data.user_id
+        )
+        if not current_member:
+            return None
+        if current_member.role == RoleEnum.ADMIN and member_data.role != RoleEnum.ADMIN:
+            return "conflict"
+        if member_data.role == RoleEnum.ADMIN and current_member.role != RoleEnum.ADMIN:
             return "conflict"
         new_value = await super().update(
             data_to_update=member_data,
             user_id=member_data.user_id,
             board_id=member_data.id,
         )
+        if await self._get_admin_count(board_id=member_data.id) < 1:
+            return None
         return new_value
 
     async def delete_member_from_the_board(
-        self, board_id: int, user_id: UUID
-    ) -> None | bool:
+        self, board_id: int, user_id: UUID, current_user: UUID
+    ) -> None | bool | str:
         """
         Method to delete member from the board. Action may be \n
         done only by the admin.
@@ -114,6 +130,17 @@ class MemberRepo(BaseRepository[BoardMembers, AddBoardMemberUUID, UpdateMemberWi
         Returns:
             bool
         """
+        member: BoardMembers | None = await self.get_entity(
+            board_id=board_id, user_id=user_id
+        )
+        if not member:
+            return None
+        if current_user == user_id:
+            return "conflict"
+        if member.role == RoleEnum.ADMIN:
+            admin_count = await self._get_admin_count(board_id=board_id)
+            if admin_count <= 1:
+                return "last admin"
         if not (await super().delete(board_id=board_id, user_id=user_id)):
             return None
         return True

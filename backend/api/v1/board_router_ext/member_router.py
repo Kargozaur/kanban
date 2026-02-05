@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from backend.core.utility.role_enum import RoleEnum
+from backend.dependancies.auth_dep import CurrentUserDep
 from backend.dependancies.member_svc_dep import MemberSvcDep
 from backend.dependancies.permission_dep import PermissionDep
 from backend.schemas.member_schema import (
@@ -42,9 +43,10 @@ def create_member_router() -> APIRouter:
         board_id: int,
         update_member: UpdateBoardMember,
         member_svc: MemberSvcDep,
+        current_user: CurrentUserDep,
     ) -> MemberResponse:
         return await member_svc.update_user_role(
-            board_id=board_id, user_data=update_member
+            board_id=board_id, user_data=update_member, current_user=current_user.id
         )
 
     @member_router.delete(
@@ -58,7 +60,10 @@ def create_member_router() -> APIRouter:
         board_id: int,
         email: str,
         member_svc: MemberSvcDep,
+        current_user: CurrentUserDep,
     ) -> None:
-        await member_svc.delete_user_from_the_board(board_id=board_id, user_email=email)
+        await member_svc.delete_user_from_the_board(
+            board_id=board_id, user_email=email, current_user=current_user.id
+        )
 
     return member_router

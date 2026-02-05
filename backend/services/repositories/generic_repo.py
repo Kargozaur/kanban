@@ -1,5 +1,4 @@
 from typing import Any
-from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -15,6 +14,11 @@ class BaseRepository[
         self.session = session
         self.model = model
 
+    async def get_entity(self, **filters: object) -> ModelT | None:
+        query = select(self.model).filter_by(**filters)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
     async def create(self, data: CreateSchemaT, **extra_fields: object) -> ModelT:
         payload: dict[str, Any] = data.model_dump()
         payload.update(extra_fields)
@@ -26,34 +30,23 @@ class BaseRepository[
     async def update(
         self,
         data_to_update: UpdateSchemaT,
-        request_user: UUID | None = None,
         **filters: object,
     ) -> None | ModelT:
-        query = select(self.model).filter_by(**filters)
-        existing_field = await self.session.execute(query)
-        if not (current_object := existing_field.scalar_one_or_none()):
+        existing_field = await self.get_entity(**filters)
+        if not (existing_field):
             return None
         update_data: dict[str, Any] = data_to_update.model_dump(
             exclude_unset=True, exclude={"id", "user_id"}
         )
-        if request_user and current_object.id == request_user:
-            update_data.pop("is_admin", None)
-            update_data.pop("is_superuser", None)
         for k, v in update_data.items():
-            if hasattr(current_object, k):
-                setattr(current_object, k, v)
+            if hasattr(existing_field, k):
+                setattr(existing_field, k, v)
         await self.session.flush()
-        return current_object
+        return existing_field
 
-    async def delete(
-        self, request_user: UUID | None = None, **filters: object
-    ) -> None | bool:
-        query = select(self.model).filter_by(**filters)
-        result = await self.session.execute(query)
-        existing_field = result.scalar_one_or_none()
-        if not existing_field:
-            return None
-        if request_user and existing_field.owner_id == request_user:
+    async def delete(self, **filters: object) -> None | bool:
+
+        if not (existing_field := await self.get_entity(**filters)):
             return None
         await self.session.delete(existing_field)
         await self.session.flush()
