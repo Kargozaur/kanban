@@ -1,5 +1,5 @@
 from fastapi import Depends
-from fastapi.params import Depends as DepensInstance
+from fastapi.params import Depends as DependancyInstance
 
 from backend.core.security.permission_service import PermissionService
 from backend.core.utility.role_enum import RoleEnum
@@ -7,7 +7,7 @@ from backend.dependancies.auth_dep import CurrentUserDep
 from backend.dependancies.db_dep import DBDep
 
 
-def PermissionDep(required_roles: list[RoleEnum] | RoleEnum) -> DepensInstance:
+def PermissionDep(required_roles: list[RoleEnum] | RoleEnum) -> DependancyInstance:
     """
     Permission Dependancy for the requests, related to the endpoints. \n
     Manages BoardMembers table. Checks the of the user inside the table.
