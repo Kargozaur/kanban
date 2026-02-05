@@ -11,6 +11,7 @@ from backend.schemas.tasks_schema import (
     CreateTaskBase,
     TaskView,
     UpdateTask,
+    UpdateTaskBase,
 )
 
 
@@ -80,14 +81,23 @@ class TasksService:
 
     @transactional
     async def update_task(
-        self, board_id: int, column_id: int, task_id: int, new_data: UpdateTask
+        self,
+        board_id: int,
+        column_id: int,
+        task_id: int,
+        new_data: UpdateTaskBase,
+        email: str | None = None,
     ) -> TaskView:
+        user_id: UUID | None = None
+        if email is not None:
+            user_id: UUID = await self._get_user_id(email=email)
+        updated_data = UpdateTask(**new_data.model_dump(), assignee_id=user_id)
         if not (
             result := await self.uow.tasks.update_task(
                 board_id=board_id,
                 column_id=column_id,
                 task_id=task_id,
-                data_to_update=new_data,
+                data_to_update=updated_data,
             )
         ):
             raise ERROR_MAP[TaskErrorKeys.NOT_FOUND]()

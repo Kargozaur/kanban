@@ -7,7 +7,7 @@ from backend.schemas.board_schema import BoardTaskView
 from backend.schemas.tasks_schema import (
     CreateTaskBase,
     TaskView,
-    UpdateTask,
+    UpdateTaskBase,
 )
 
 
@@ -70,11 +70,16 @@ def create_tasks_router() -> APIRouter:
         board_id: int,
         column_id: int,
         task_id: int,
-        new_data: UpdateTask,
+        new_data: UpdateTaskBase,
         task_svc: TaskSvcDep,
+        email: str | None = Body(default=None),
     ) -> TaskView:
         return await task_svc.update_task(
-            board_id=board_id, column_id=column_id, task_id=task_id, new_data=new_data
+            board_id=board_id,
+            column_id=column_id,
+            task_id=task_id,
+            new_data=new_data,
+            email=email,
         )
 
     @tasks_router.delete(

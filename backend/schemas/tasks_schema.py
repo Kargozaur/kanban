@@ -13,6 +13,8 @@ class TaskView(GenericId[int]):
     description: str
     position: Decimal
     created_at: datetime
+    assignee_id: UUID | None
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -41,7 +43,7 @@ class CreateTask(CreateTaskBase):
     ]
 
 
-class UpdateTask(BaseModel):
+class UpdateTaskBase(BaseModel):
     title: Annotated[
         str | None,
         Field(
@@ -61,7 +63,9 @@ class UpdateTask(BaseModel):
         Decimal | None, Field(default=None, gt=0, max_digits=20, decimal_places=10)
     ]
 
-    assignee: Annotated[
+
+class UpdateTask(UpdateTaskBase):
+    assignee_id: Annotated[
         UUID | None,
         Field(
             default=None,
