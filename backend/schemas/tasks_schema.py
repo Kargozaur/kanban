@@ -64,6 +64,7 @@ class UpdateTask(BaseModel):
     assignee: Annotated[
         UUID | None,
         Field(
-            ..., description="assign task to the user represented in the board or skip"
+            default=None,
+            description="assign task to the user represented in the board or skip",
         ),
     ]

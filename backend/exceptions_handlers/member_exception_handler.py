@@ -7,6 +7,7 @@ from backend.core.exceptions.members_exceptions import (
     MemberBaseException,
     MemberNotFound,
     SecondAdmin,
+    SelfDemote,
 )
 
 
@@ -53,3 +54,7 @@ def member_exception_handler(app: FastAPI) -> None:
             status_code=exc.status_code,
             content={"detail": exc.detail},
         )
+
+    @app.exception_handler(SelfDemote)
+    async def self_demote_error(request: Request, exc: SelfDemote) -> JSONResponse:
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})

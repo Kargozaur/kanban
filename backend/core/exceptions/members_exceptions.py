@@ -40,3 +40,11 @@ class SecondAdmin(MemberBaseException):
 
     def __init__(self, message: str) -> None:
         super().__init__(message)
+
+
+class SelfDemote(MemberBaseException):
+    status_code = 409
+    detail = "You can not demote yourself"
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)

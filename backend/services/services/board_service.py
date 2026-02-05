@@ -2,11 +2,8 @@ from uuid import UUID
 
 from backend.core.decorators.read_only import read_only
 from backend.core.decorators.transactional import transactional
-from backend.core.exceptions.board_exceptions import (
-    BoardBaseException,
-    BoardNotFound,
-    BoardPermissionDenied,
-)
+from backend.core.exception_mappers.board_mapper import ERROR_MAP
+from backend.core.utility.exception_map_keys import BoardErrorKeys
 from backend.database.unit_of_work import UnitOfWork
 from backend.schemas.board_schema import (
     BoardCreate,
@@ -28,7 +25,7 @@ class BoardService:
                 owner_id=owner_id, board_data=board_data
             )
         ):
-            raise BoardBaseException("Could not create a board")
+            raise ERROR_MAP[BoardErrorKeys.BASE]()
         return BoardGet.model_validate(result)
 
     @read_only
@@ -41,7 +38,7 @@ class BoardService:
     @read_only
     async def get_board(self, user_id: UUID, id: int) -> BoardFullView:
         if not (result := await self.uow.boards.get_board(user_id=user_id, id=id)):
-            raise BoardNotFound(f"Board with the id {id} is not found")
+            raise ERROR_MAP[BoardErrorKeys.NOT_FOUND]()
         return BoardFullView.model_validate(result)
 
     @transactional
@@ -54,12 +51,12 @@ class BoardService:
                 data_to_update=data_to_update,
             )
         ):
-            raise BoardNotFound(f"Coudn't find a board with the id: {board_id}")
+            raise ERROR_MAP[BoardErrorKeys.NOT_FOUND]()
         return BoardGet.model_validate(result)
 
     @transactional
     async def delete_board(self, id: int) -> str:
         result: None | bool = await self.uow.boards.delete_board(id)
         if not result:
-            raise BoardPermissionDenied("")
+            raise ERROR_MAP[BoardErrorKeys.PERMISSION_DENIED]()
         return f"Board {id} was succesfully deleted"

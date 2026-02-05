@@ -1,6 +1,7 @@
 from backend.core.decorators.read_only import read_only
 from backend.core.decorators.transactional import transactional
-from backend.core.exceptions.columns_exceptions import ColumnNotFound
+from backend.core.exception_mappers.column_mapper import ERROR_MAP
+from backend.core.utility.exception_map_keys import ColumnErrorKeys
 from backend.database.unit_of_work import UnitOfWork
 from backend.schemas.columns_schema import (
     ColumnCreate,
@@ -41,7 +42,7 @@ class ColumnService:
                 new_data=new_data,
             )
         ):
-            raise ColumnNotFound(f"Column with the id {column_id} not found")
+            raise ERROR_MAP[ColumnErrorKeys.NOT_FOUND]()
         return ColumnGet.model_validate(result)
 
     @transactional
@@ -49,4 +50,4 @@ class ColumnService:
         if not await self.uow.columns.drop_column(
             column_id=column_id, board_id=board_id
         ):
-            raise ColumnNotFound(f"Column with the id {column_id} not found")
+            raise ERROR_MAP[ColumnErrorKeys.NOT_FOUND]()

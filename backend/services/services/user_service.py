@@ -3,12 +3,10 @@ from typing import Any
 from anyio.to_thread import run_sync
 
 from backend.core.decorators.transactional import transactional
-from backend.core.exceptions.exceptions import (
-    NotFoundError,
-    UserAlreadyExists,
-)
+from backend.core.exception_mappers.user_mapper import ERROR_MAP
 from backend.core.security.password_hasher import PasswordHasher
 from backend.core.security.token_svc import TokenSvc
+from backend.core.utility.exception_map_keys import UserErrorKeys
 from backend.database.unit_of_work import UnitOfWork
 from backend.schemas.token_schema import TokenResponse
 from backend.schemas.user_schema import (
@@ -46,7 +44,7 @@ class UserService:
         user_orm = await self.uow.users.create_user(updated_model)
 
         if not user_orm:
-            raise UserAlreadyExists()
+            raise ERROR_MAP[UserErrorKeys.ALREADY_EXISTS]()
         result = UserGet.model_validate(user_orm)
 
         return result
@@ -56,14 +54,14 @@ class UserService:
         if not (
             check_if_exists := await self.uow.users.get_user_data(user_credential.email)
         ):
-            raise NotFoundError()
+            raise ERROR_MAP[UserErrorKeys.NOT_FOUND]()
         is_password_correct: bool = await run_sync(
             self.password_hasher.verify_password,
             user_credential.password,
             check_if_exists.password,
         )
         if not is_password_correct:
-            raise NotFoundError()
+            raise ERROR_MAP[UserErrorKeys.NOT_FOUND]()
         access_token = await self.token_service.create_token(check_if_exists)
         token: dict[str, Any] = {
             "access_token": access_token,
