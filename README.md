@@ -72,10 +72,17 @@ cd kanban
 ```sh
 uv venv
 uv sync --frozen
-cd backend; uv run alembic upgrade head; cd ..
 ```
 
-3. Configure the .env file. It should look something like this
+3. Perform a migration
+
+```
+cd backend
+uv run alembic upgrade head
+cd ..
+```
+
+4. Configure the .env file. It should look something like this
 
 ```dotenv
 # --- POSTGRES deps ---
