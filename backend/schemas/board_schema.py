@@ -76,10 +76,3 @@ class BoardFullView(GenericId[int]):
     columns: Annotated[list[ColumnBoardView], Field(default_factory=list)]
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class BoardTaskView(BaseModel):
-    board_name: Annotated[str, Field(alias="name")]
-    tasks: list[TaskView] = Field(default_factory=list)
-
-    model_config = ConfigDict(from_attributes=True)

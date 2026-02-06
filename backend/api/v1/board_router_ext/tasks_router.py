@@ -3,7 +3,7 @@ from fastapi import APIRouter, Body
 from backend.core.utility.role_enum import RoleEnum
 from backend.dependencies.permission_dep import PermissionDep
 from backend.dependencies.service_dependencies.tasks_dep import TaskSvcDep
-from backend.schemas.board_schema import BoardTaskView
+from backend.schemas.columns_schema import ColumnGetFull
 from backend.schemas.tasks_schema import (
     CreateTaskBase,
     TaskView,
@@ -21,6 +21,7 @@ def create_tasks_router() -> APIRouter:
         "/add_task",
         dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
         status_code=201,
+        description="Add task to the column",
     )
     async def add_task(
         board_id: int,
@@ -39,11 +40,12 @@ def create_tasks_router() -> APIRouter:
             PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
         ],
         status_code=200,
+        description="Get full info about the column",
     )
-    async def get_tasks_for_the_board(
+    async def get_tasks_for_the_column(
         board_id: int, column_id: int, task_svc: TaskSvcDep
-    ) -> BoardTaskView:
-        return await task_svc.get_board_with_tasks(
+    ) -> ColumnGetFull:
+        return await task_svc.get_column_with_tasks(
             board_id=board_id, column_id=column_id
         )
 
@@ -53,9 +55,13 @@ def create_tasks_router() -> APIRouter:
             PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
         ],
         status_code=200,
+        description="Get full info about the single task",
     )
     async def get_single_task(
-        board_id: int, column_id: int, task_id: int, task_svc: TaskSvcDep
+        board_id: int,
+        column_id: int,
+        task_id: int,
+        task_svc: TaskSvcDep,
     ) -> TaskView:
         return await task_svc.get_task(
             board_id=board_id, column_id=column_id, task_id=task_id
@@ -65,6 +71,7 @@ def create_tasks_router() -> APIRouter:
         "/{task_id}",
         dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
         status_code=200,
+        description="Update task by either updating it data or setting a new assignee",
     )
     async def update_task(
         board_id: int,
@@ -86,6 +93,7 @@ def create_tasks_router() -> APIRouter:
         "/{task_id}",
         dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
         status_code=204,
+        description="Delete task",
     )
     async def delete_task(
         board_id: int, column_id: int, task_id: int, task_svc: TaskSvcDep

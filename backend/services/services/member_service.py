@@ -26,7 +26,7 @@ class MemberService:
     async def add_member_to_the_board(
         self, board_id: int, user_data: AddBoardMemberEmail
     ) -> MemberResponse:
-        user = await self._get_user(email=user_data.email)
+        user: UUID = await self._get_user(email=user_data.email)
         new_member = AddBoardMemberUUID(role=user_data.role, user_id=user)
 
         if not (

@@ -3,6 +3,7 @@ from backend.core.decorators.transactional import transactional
 from backend.core.exception_mappers.column_mapper import ERROR_MAP
 from backend.core.utility.exception_map_keys import ColumnErrorKeys
 from backend.database.unit_of_work import UnitOfWork
+from backend.models.models import Columns
 from backend.schemas.columns_schema import (
     ColumnCreate,
     ColumnGet,
@@ -17,7 +18,7 @@ class ColumnService:
 
     @transactional
     async def add_column(self, board_id: int, column_data: ColumnCreate) -> ColumnGet:
-        result = await self.uow.columns.add_column(
+        result: Columns = await self.uow.columns.add_column(
             board_id=board_id, column_data=column_data
         )
         return ColumnGet.model_validate(result)
@@ -26,7 +27,7 @@ class ColumnService:
     async def get_column_with_task(
         self, column_id: int, board_id: int
     ) -> ColumnGetFull:
-        result = await self.uow.columns.get_column_with_tasks(
+        result: Columns | None = await self.uow.columns.get_column_with_tasks(
             column_id=column_id, board_id=board_id
         )
         return ColumnGetFull.model_validate(result)

@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from backend.core.decorators.read_only import read_only
@@ -5,6 +6,7 @@ from backend.core.decorators.transactional import transactional
 from backend.core.exception_mappers.board_mapper import ERROR_MAP
 from backend.core.utility.exception_map_keys import BoardErrorKeys
 from backend.database.unit_of_work import UnitOfWork
+from backend.models.models import Boards
 from backend.schemas.board_schema import (
     BoardCreate,
     BoardFullView,
@@ -30,7 +32,7 @@ class BoardService:
 
     @read_only
     async def get_boards(self, user_id: UUID, pagination: Pagination) -> list[BoardGet]:
-        result = await self.uow.boards.get_boards(
+        result: Sequence[Boards] = await self.uow.boards.get_boards(
             user_id=user_id, pagination=pagination
         )
         return [BoardGet.model_validate(values) for values in result]

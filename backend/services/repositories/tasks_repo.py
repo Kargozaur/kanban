@@ -5,7 +5,7 @@ from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.models.models import Boards, Tasks
+from backend.models.models import Columns, Tasks
 from backend.schemas.tasks_schema import CreateTask, UpdateTask
 from backend.services.repositories.generic_repo import BaseRepository
 
@@ -57,21 +57,21 @@ class TasksRepo(BaseRepository[Tasks, CreateTask, UpdateTask]):
 
     async def get_tasks_for_the_board(
         self, board_id: int, column_id: int
-    ) -> Boards | None:
+    ) -> Columns | None:
         """Gets board with the tasks
         Args:
             board_id (int)
             column_id (int)
         Returns:
-            Boards | None
+            Columns | None
         """
         query = (
-            select(Boards)
-            .where(Boards.id == board_id)
-            .options(selectinload(Boards.tasks.and_(Tasks.column_id == column_id)))
+            select(Columns)
+            .where(Columns.id == column_id, Columns.board_id == board_id)
+            .options(selectinload(Columns.tasks.and_(Tasks.column_id == column_id)))
         )
         result = await self.session.execute(query)
-        rows: Boards | None = result.scalar_one_or_none()
+        rows: Columns | None = result.scalar_one_or_none()
         return rows
 
     async def get_task(

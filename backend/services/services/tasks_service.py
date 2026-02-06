@@ -5,7 +5,8 @@ from backend.core.decorators.transactional import transactional
 from backend.core.exception_mappers.task_mapper import ERROR_MAP
 from backend.core.utility.exception_map_keys import TaskErrorKeys
 from backend.database.unit_of_work import UnitOfWork
-from backend.schemas.board_schema import BoardTaskView
+from backend.models.models import User
+from backend.schemas.columns_schema import ColumnGetFull
 from backend.schemas.tasks_schema import (
     CreateTask,
     CreateTaskBase,
@@ -20,7 +21,7 @@ class TasksService:
         self.uow = uow
 
     async def _get_user_id(self, email: str) -> UUID:
-        result = await self.uow.users.get_user_by_email(email=email)
+        result: User | None = await self.uow.users.get_user_by_email(email=email)
         if result is None:
             raise ERROR_MAP[TaskErrorKeys.USER_NOT_FOUND]()
         return result.id
@@ -57,16 +58,16 @@ class TasksService:
         return TaskView.model_validate(result)
 
     @read_only
-    async def get_board_with_tasks(
+    async def get_column_with_tasks(
         self, board_id: int, column_id: int
-    ) -> BoardTaskView:
+    ) -> ColumnGetFull:
         if not (
             result := await self.uow.tasks.get_tasks_for_the_board(
                 board_id=board_id, column_id=column_id
             )
         ):
             raise ERROR_MAP[TaskErrorKeys.BOARD_NOT_FOUND]()
-        return BoardTaskView.model_validate(result)
+        return ColumnGetFull.model_validate(result)
 
     @read_only
     async def get_task(self, board_id: int, column_id: int, task_id: int) -> TaskView:

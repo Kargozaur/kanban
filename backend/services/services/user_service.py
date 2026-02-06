@@ -8,6 +8,7 @@ from backend.core.security.password_hasher import PasswordHasher
 from backend.core.security.token_svc import TokenSvc
 from backend.core.utility.exception_map_keys import UserErrorKeys
 from backend.database.unit_of_work import UnitOfWork
+from backend.models.models import User
 from backend.schemas.token_schema import TokenResponse
 from backend.schemas.user_schema import (
     UserCredentials,
@@ -17,13 +18,6 @@ from backend.schemas.user_schema import (
 
 
 class UserService:
-    """
-    User service \n
-    methods: \n
-    create_user(user_credential) \n
-    login_user(user_credential) \n
-    """
-
     def __init__(
         self,
         uow: UnitOfWork,
@@ -36,16 +30,18 @@ class UserService:
 
     @transactional
     async def create_user(self, user_credential: UserCredentials) -> UserGet:
-        hashed_password = await run_sync(
+        hashed_password: str = await run_sync(
             self.password_hasher.hash_password, user_credential.password
         )
-        updated_model = user_credential.model_copy(update={"password": hashed_password})
+        updated_model: UserCredentials = user_credential.model_copy(
+            update={"password": hashed_password}
+        )
 
-        user_orm = await self.uow.users.create_user(updated_model)
+        user_orm: User | None = await self.uow.users.create_user(updated_model)
 
         if not user_orm:
             raise ERROR_MAP[UserErrorKeys.ALREADY_EXISTS]()
-        result = UserGet.model_validate(user_orm)
+        result: UserGet = UserGet.model_validate(user_orm)
 
         return result
 
@@ -62,7 +58,7 @@ class UserService:
         )
         if not is_password_correct:
             raise ERROR_MAP[UserErrorKeys.NOT_FOUND]()
-        access_token = await self.token_service.create_token(check_if_exists)
+        access_token: str = await self.token_service.create_token(check_if_exists)
         token: dict[str, Any] = {
             "access_token": access_token,
             "token_type": "Bearer",
