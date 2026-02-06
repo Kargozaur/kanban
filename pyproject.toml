@@ -14,23 +14,18 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "aiosqlite>=0.22.1",
-    "pytest-asyncio>=1.3.0",
-    "ruff>=0.15.0",
-]
+dev = ["aiosqlite>=0.22.1", "pytest-asyncio>=1.3.0", "ruff>=0.15.0"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 
-[too.ruff]
+[tool.ruff]
 line-length = 88
 target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "ANN", "UP"]
-ignore = ["ANN101"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["backend"]
