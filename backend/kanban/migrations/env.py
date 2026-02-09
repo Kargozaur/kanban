@@ -1,9 +1,8 @@
-if True:
-    import sys
-    from pathlib import Path
+import os
+import sys
 
-    project_root = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(project_root))
+
+sys.path.insert(0, os.getcwd())
 import asyncio
 from logging.config import fileConfig
 

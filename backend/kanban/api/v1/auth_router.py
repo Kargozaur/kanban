@@ -40,9 +40,6 @@ def create_auth_router() -> APIRouter:
         user_svc: UserSvcDep,
         form_data: FormData,
     ) -> TokenResponse | dict[str, str]:
-        existing_token = request.cookies.get("access_token")
-        if existing_token:
-            return {"message": "You are already logged in"}
         user_credentials = UserLogin(
             email=form_data.username, password=form_data.password
         )

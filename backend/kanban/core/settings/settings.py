@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from backend.kanban.core.settings.db_settings import DbSettings, SQLAlchemy
@@ -14,7 +12,7 @@ class AppSettings(BaseSettings):
     logging: LoggingSettings
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().parents[4] / ".env",
+        env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
