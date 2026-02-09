@@ -10,6 +10,8 @@ from backend.kanban.services.repositories.user_repo import UserRepository
 
 
 class UnitOfWork:
+    """Unit of work for the services"""
+
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.users = UserRepository(self.session)
