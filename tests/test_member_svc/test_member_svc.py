@@ -76,7 +76,7 @@ async def test_adding_user_as_admin(
 
 async def test_updating_user(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
-    result = await client.patch(
+    result = await client.put(
         f"/api/v1/board/{two_members['board_id']}/members/update",
         json={"email": two_members["member_email"], "role": "member"},
     )
@@ -85,7 +85,7 @@ async def test_updating_user(two_members: dict[str, Any]) -> None:
 
 async def test_updating_unknown_user(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
-    result = await client.patch(
+    result = await client.put(
         f"/api/v1/board/{two_members['board_id']}/members/update",
         json={"email": "new@example.com", "role": "member"},
     )
@@ -94,7 +94,7 @@ async def test_updating_unknown_user(two_members: dict[str, Any]) -> None:
 
 async def test_updating_user_to_admin(two_members: dict[str, Any]) -> None:
     client = two_members["owner_client"]
-    result = await client.patch(
+    result = await client.put(
         f"/api/v1/board/{two_members['board_id']}/members/update",
         json={"email": two_members["member_email"], "role": "admin"},
     )

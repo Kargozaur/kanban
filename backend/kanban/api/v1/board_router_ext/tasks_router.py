@@ -67,7 +67,7 @@ def create_tasks_router() -> APIRouter:
             board_id=board_id, column_id=column_id, task_id=task_id
         )
 
-    @tasks_router.patch(
+    @tasks_router.put(
         "/{task_id}",
         dependencies=[PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER])],
         status_code=200,

@@ -140,7 +140,7 @@ async def test_delete_task(
     assert result.status_code == 204
 
 
-async def test_patch_task(
+async def test_put_task(
     bulk_creation: AsyncClient, task_fixture: dict[str, Any]
 ) -> None:
     client = bulk_creation
@@ -149,7 +149,7 @@ async def test_patch_task(
     )
     assert existing_task.status_code == 200
     task_id: int = existing_task.json()["id"]
-    result = await client.patch(
+    result = await client.put(
         f"/api/v1/board/{task_fixture['board_id']}/columns/{task_fixture['column_id']}/tasks/{task_id}",
         json={
             "new_data": {
@@ -175,7 +175,7 @@ async def test_assign_user_to_the_task(
     )
     assert existing_task.status_code == 200
     task_id: int = existing_task.json()["id"]
-    result = await client.patch(
+    result = await client.put(
         f"/api/v1/board/{task_fixture['board_id']}/columns/{task_fixture['column_id']}/tasks/{task_id}",
         json={"new_data": {}, "email": member_email},
     )

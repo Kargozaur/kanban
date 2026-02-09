@@ -12,7 +12,7 @@ def PermissionDep(required_roles: list[RoleEnum] | RoleEnum) -> dependencyInstan
     Permission dependency for the requests, related to the endpoints. \n
     Manages BoardMembers table. Checks the of the user inside the table.
     It is managed inside the router like this : \n
-    @router.patch("/", dependencies=[PermissionDep(RoleEnum.ADMIN)])
+    @router.put("/", dependencies=[PermissionDep(RoleEnum.ADMIN)])
     """
     if not isinstance(required_roles, list):
         required_roles = [required_roles]

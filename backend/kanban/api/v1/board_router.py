@@ -72,7 +72,7 @@ def create_board_router() -> APIRouter:
     ) -> BoardFullView:
         return await board_svc.get_board(user_id=current_user.id, id=id)
 
-    @board_router.patch(
+    @board_router.put(
         "/{board_id}",
         status_code=200,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],

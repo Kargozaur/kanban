@@ -112,7 +112,7 @@ async def test_update_board(auth_client: AsyncClient) -> None:
     result = await auth_client.get("/api/v1/board/all")
     data = result.json()
     board_id = data[0]["id"]
-    update = await auth_client.patch(
+    update = await auth_client.put(
         f"/api/v1/board/{board_id}", json={"name": " New name"}
     )
     data = update.json()
@@ -121,7 +121,7 @@ async def test_update_board(auth_client: AsyncClient) -> None:
 
 
 async def test_update_board_fail(auth_client: AsyncClient) -> None:
-    update = await auth_client.patch("/api/v1/board/10000", json={"name": " New name"})
+    update = await auth_client.put("/api/v1/board/10000", json={"name": " New name"})
     assert update.status_code == 404
 
 

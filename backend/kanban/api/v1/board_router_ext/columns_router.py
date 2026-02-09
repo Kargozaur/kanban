@@ -42,7 +42,7 @@ def create_columns_router() -> APIRouter:
             column_id=column_id, board_id=board_id
         )
 
-    @columns_router.patch(
+    @columns_router.put(
         "/{column_id}",
         status_code=200,
         dependencies=[PermissionDep([RoleEnum.ADMIN])],

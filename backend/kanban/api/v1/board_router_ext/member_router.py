@@ -32,7 +32,7 @@ def create_member_router() -> APIRouter:
             board_id=board_id, user_data=user_data
         )
 
-    @member_router.patch(
+    @member_router.put(
         "/update",
         dependencies=[PermissionDep([RoleEnum.ADMIN])],
         status_code=200,
