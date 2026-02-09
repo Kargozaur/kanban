@@ -34,4 +34,4 @@ RUN chmod +x /entrypoint.sh
 USER user
 EXPOSE 7000
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD ["uvicorn", "backend.kanban.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "7000"]
+CMD ["uvicorn", "backend.kanban.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "7000", "--loop", "uvloop"]
