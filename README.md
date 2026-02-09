@@ -30,19 +30,20 @@ This project implements a Kanban workflow system where tasks are organized into 
 ```
 kanban/
 ├── backend/
-│   ├── api/                    # Endpoints, routers
-│   ├── core/                   # Decorators, exception mappers, security, app config
-│   ├── database/               # DB provider and UoW
-│   ├── dependencies/           # DI
-│   ├── exceptions_handlers/    # Exception handlers for the App/SQLAlchemy/Pydantic errors
-│   ├── migrations/             # Alembic migrations
-│   ├── models/                 # SQLAlchemy models and mixins
-│   ├── schemas/                # Pydantic models for the data validation
-│   ├── services/               # Business logic via services and database operations via repositories
-│   └── main.py                 # App factory & entrypoint
-├── tests/                      # Tests
-├── pyproject.toml              # Project configuration
-└── runner.py                   # App runner
+│    │── kanban/│
+│          ├── api/                    # Endpoints, routers
+│          ├── core/                   # Decorators, exception mappers, security, app config
+│          ├── database/               # DB provider and UoW
+│          ├── dependencies/           # DI
+│          ├── exceptions_handlers/    # Exception handlers for the App/SQLAlchemy/Pydantic errors
+│          ├── migrations/             # Alembic migrations
+│          ├── models/                 # SQLAlchemy models and mixins
+│          ├── schemas/                # Pydantic models for the data validation
+│          ├── services/               # Business logic via services and database operations via repositories
+│          └── main.py                 # App factory & entrypoint
+├── tests/                              # Tests
+├── pyproject.toml                  # Project configuration
+└── runner.py                       # App runner
 ```
 
 ### Key Architectural Patterns
@@ -77,9 +78,9 @@ uv sync --frozen
 3. Perform a migration
 
 ```
-cd backend
+cd backend/kanban
 uv run alembic upgrade head
-cd ..
+cd ../../
 ```
 
 4. Configure the .env file. It should look something like this
@@ -116,7 +117,7 @@ uv run runner.py (or python runner.py)
 *Note: docker file is not yet created, if you want to run it manually via the uvicorn, you should use the following command:*
 
 ```sh
-uv run uvicorn backend.main:create_app --host 0.0.0.0 --port <desired port> --factory --loop "uvloop"  
+uv run uvicorn backend.kanban.main:create_app --host 0.0.0.0 --port <desired port> --factory --loop "uvloop"  
 ```
 If you want app to reload on save (If you made some changes yourself) add --reload flag.
 Also, you can add workers via adding --workers=<amount of workers> flag.

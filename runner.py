@@ -3,7 +3,7 @@ import uvicorn
 
 if __name__ == "__main__":
     uvicorn.run(
-        "backend.main:create_app",
+        "backend.kanban.main:create_app",
         port=7000,
         host="0.0.0.0",
         reload=True,

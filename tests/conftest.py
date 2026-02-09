@@ -6,14 +6,14 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.security.password_hasher import get_hasher
-from backend.core.security.token_svc import get_token_svc
-from backend.core.settings.settings import get_settings
-from backend.database.session_provider import get_db
-from backend.database.unit_of_work import UnitOfWork
-from backend.database.uow_provider import get_uow
-from backend.main import create_app
-from backend.models.models import Base
+from backend.kanban.core.security.password_hasher import get_hasher
+from backend.kanban.core.security.token_svc import get_token_svc
+from backend.kanban.core.settings.settings import get_settings
+from backend.kanban.database.session_provider import get_db
+from backend.kanban.database.unit_of_work import UnitOfWork
+from backend.kanban.database.uow_provider import get_uow
+from backend.kanban.main import create_app
+from backend.kanban.models.models import Base
 from tests.db import AsyncSessionTest, test_engine
 
 

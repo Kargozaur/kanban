@@ -1,0 +1,66 @@
+from typing import Any
+
+from anyio.to_thread import run_sync
+
+from backend.kanban.core.decorators.transactional import transactional
+from backend.kanban.core.exception_mappers.user_mapper import ERROR_MAP
+from backend.kanban.core.security.password_hasher import PasswordHasher
+from backend.kanban.core.security.token_svc import TokenSvc
+from backend.kanban.core.utility.exception_map_keys import UserErrorKeys
+from backend.kanban.database.unit_of_work import UnitOfWork
+from backend.kanban.models.models import User
+from backend.kanban.schemas.token_schema import TokenResponse
+from backend.kanban.schemas.user_schema import (
+    UserCredentials,
+    UserGet,
+    UserLogin,
+)
+
+
+class UserService:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        password_hasher: PasswordHasher,
+        token_service: TokenSvc,
+    ) -> None:
+        self.uow = uow
+        self.password_hasher = password_hasher
+        self.token_service = token_service
+
+    @transactional
+    async def create_user(self, user_credential: UserCredentials) -> UserGet:
+        hashed_password: str = await run_sync(
+            self.password_hasher.hash_password, user_credential.password
+        )
+        updated_model: UserCredentials = user_credential.model_copy(
+            update={"password": hashed_password}
+        )
+
+        user_orm: User | None = await self.uow.users.create_user(updated_model)
+
+        if not user_orm:
+            raise ERROR_MAP[UserErrorKeys.ALREADY_EXISTS]()
+        result: UserGet = UserGet.model_validate(user_orm)
+
+        return result
+
+    @transactional
+    async def login_user(self, user_credential: UserLogin) -> TokenResponse:
+        if not (
+            check_if_exists := await self.uow.users.get_user_data(user_credential.email)
+        ):
+            raise ERROR_MAP[UserErrorKeys.NOT_FOUND]()
+        is_password_correct: bool = await run_sync(
+            self.password_hasher.verify_password,
+            user_credential.password,
+            check_if_exists.password,
+        )
+        if not is_password_correct:
+            raise ERROR_MAP[UserErrorKeys.NOT_FOUND]()
+        access_token: str = await self.token_service.create_token(check_if_exists)
+        token: dict[str, Any] = {
+            "access_token": access_token,
+            "token_type": "Bearer",
+        }
+        return TokenResponse.model_validate(token)

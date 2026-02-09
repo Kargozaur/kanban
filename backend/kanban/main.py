@@ -1,0 +1,86 @@
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+
+from backend.kanban.api.routers import create_api_router
+from backend.kanban.core.security.password_hasher import get_hasher
+from backend.kanban.core.security.token_svc import get_token_svc
+from backend.kanban.core.settings.log_settings import configure_logging
+from backend.kanban.core.settings.settings import get_settings
+from backend.kanban.database.database_provider import DatabaseProvider
+from backend.kanban.database.db_config import init_db
+from backend.kanban.exceptions_handlers.base_exception_handler import (
+    base_exception_handler,
+)
+from backend.kanban.exceptions_handlers.board_handler import (
+    board_exceptions_handler,
+)
+from backend.kanban.exceptions_handlers.columns_exception_handler import (
+    columns_exception_handler,
+)
+from backend.kanban.exceptions_handlers.member_exception_handler import (
+    member_exception_handler,
+)
+from backend.kanban.exceptions_handlers.pydantic_handler import (
+    pydantic_exceptions_handler,
+)
+from backend.kanban.exceptions_handlers.sqlalchemy_exception_handler import (
+    sqlalchemy_handler,
+)
+from backend.kanban.exceptions_handlers.tasks_exception_handler import (
+    tasks_exception_handler,
+)
+from backend.kanban.exceptions_handlers.user_handler import (
+    user_exception_handler,
+)
+
+
+logger = logging.getLogger(__name__)
+
+
+def create_app() -> FastAPI:
+    """FastAPI app factory"""
+    app = FastAPI(
+        lifespan=lifespan,
+        default_response_class=JSONResponse,
+        description="""
+        FastAPI backend for the Kanban app.
+        App handles JWT authentication. Role management based on the
+        FastAPI dependencies,
+        full CRUD operations on kanban boards.
+    """,
+    )
+    base_exception_handler(app)
+    board_exceptions_handler(app)
+    pydantic_exceptions_handler(app)
+    user_exception_handler(app)
+    member_exception_handler(app)
+    columns_exception_handler(app)
+    tasks_exception_handler(app)
+    sqlalchemy_handler(app)
+    app.include_router(create_api_router())
+
+    @app.get("/")
+    async def main() -> dict[str, str]:
+        return {"App": "Kanban"}
+
+    return app
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator:
+    settings = get_settings()
+    pass_hasher = get_hasher()
+    token_svc = get_token_svc(settings)
+    configure_logging(level=settings.logging.level)
+    engine, async_session_maker = init_db(settings)
+    app.state.db = DatabaseProvider(async_session_maker)
+    app.state.settings = settings
+    app.state.hasher = pass_hasher
+    app.state.token = token_svc
+    yield
+
+    await engine.dispose()
