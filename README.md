@@ -48,14 +48,14 @@ kanban/
 
 ### Key Architectural Patterns
 
-- [Generic repository](backend/services/repositories/generic_repo.py) - abstracted database operations to keep repositores DRY.
-- [Unit of Work](backend/database/unit_of_work.py) - ensures atomic operations across multiple repositories. Managed via decorators [@transactional](backend/core/decorators/transactional.py) and [@read_only](backend/core/decorators/read_only.py).
+- [Generic repository](backend/kanban/services/repositories/generic_repo.py) - abstracted database operations to keep repositores DRY.
+- [Unit of Work](backend/kanban/database/unit_of_work.py) - ensures atomic operations across multiple repositories. Managed via decorators [@transactional](backend/kanban/core/decorators/transactional.py) and [@read_only](backend/kanban/core/decorators/read_only.py).
 
-- [RBAC](backend/core/security/permission_service.py) - [permission management](backend/dependencies/permission_dep.py) directly in routers. Example:
+- [RBAC](backend/kanban/core/security/permission_service.py) - [permission management](backend/kanban/dependencies/permission_dep.py) directly in routers. Example:
 ```python
 @router.post("/api/v1/myapi", dependencies=[PermissionDep(RoleEnum.ADMIN)])
 ```
-- [JWT Auth](backend/core/security/user_auth.py) - [stateless](backend/dependencies/auth_dep.py) session management using [HTTP-only cookies](backend/api/v1/auth_router.py).
+- [JWT Auth](backend/kanban/core/security/user_auth.py) - [stateless](backend/kanban/dependencies/auth_dep.py) session management using [HTTP-only cookies](backend/kanban/api/v1/auth_router.py).
 
 *Note: Currently app supports only 1 admin per board. Admins can not demote themselves to the different role.*
 
