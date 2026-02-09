@@ -1,0 +1,51 @@
+name: Run tests
+
+on:
+  push:
+    branches: ["master"]
+
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependancies
+        run: uv sync --all-groups
+
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          POSTGRES__USER=${{ secrets.POSTGRES__USER || 'postgres' }}
+          POSTGRES__PASSWORD=${{ secrets.POSTGRES__PASSWORD || '1234' }}
+          POSTGRES__HOST=localhost
+          POSTGRES__DB=kanban
+          POSTGRES__PORT=5432
+          POSTGRES__DRIVER=asyncpg
+
+          TOKEN__SECRET=${{ secrets.TOKEN__SECRET }}
+          TOKEN__TOKEN_TTL=60
+          TOKEN__ALGORITHM=HS256
+
+          LOGGING__LEVEL=INFO
+
+          SQLALCHEMY__ECHO=false
+          SQLALCHEMY__ECHO_POOL=false
+          SQLALCHEMY__POOL_SIZE=5
+          SQLALCHEMY__MAX_OVERFLOW=10
+
+      - name: Run tests
+        run: uv run pytest
