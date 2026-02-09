@@ -1,0 +1,52 @@
+version: "3"
+
+services: 
+  database:
+    image: postgres:18.1-alpine3.22
+    env_file:
+      - .env_db
+    environment:
+      POSTGRES_USER: ${DB_USER?Set username!}
+      POSTGRES_PASSWORD: ${DB_PASSWORD?Set password!}
+      POSTGRES_DB: ${DB_NAME?Set db name!}
+    restart: unless-stopped
+    ports: 
+      - "5433:5432"
+    shm_size: 256mb
+    volumes:
+     - db_volume:/var/lib/postgresql/data
+    networks:
+     - InternalNetwork
+    
+  app:
+    depends_on:
+      - database
+    image: kanban-app
+    env_file:
+      - .env
+    environment:
+      POSTGRES__USER: ${POSTGRES__USER}
+      POSTGRES__PASSWORD: ${POSTGRES__PASSWORD}
+      POSTGRES__HOST: database
+      POSTGRES__DB: ${POSTGRES__DB}
+      POSTGRES__PORT: ${POSTGRES__PORT}
+      POSTGRES__DRIVER: ${POSTGRES__DRIVER}
+      TOKEN__SECRET: ${TOKEN__SECRET}
+      TOKEN__TOKEN_TTL: ${TOKEN__TOKEN_TTL}
+      TOKEN__ALGORITHM: ${TOKEN__ALGORITHM}
+      LOGGING__LEVEL: ${LOGGING__LEVEL}
+      SQLALCHEMY__ECHO: ${SQLALCHEMY__ECHO}
+      SQLALCHEMY__ECHO_POOL: ${SQLALCHEMY__ECHO_POOL}
+      SQLALCHEMY__MAX_OVERFLOW: ${SQLALCHEMY__MAX_OVERFLOW}
+      SQLALCHEMY__POOL_SIZE: ${SQLALCHEMY__POOL_SIZE}
+    ports:
+      - "7000:7000"
+    networks:
+    - InternalNetwork
+
+volumes:
+  db_volume:
+
+networks:
+  InternalNetwork:
+    driver: bridge

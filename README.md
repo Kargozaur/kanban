@@ -75,7 +75,7 @@ uv venv
 uv sync --frozen
 ```
 
-3. Perform a migration
+3. Run a migration
 
 ```
 cd backend/kanban
@@ -114,7 +114,7 @@ openssl rand -hex <desired length>, f.e 32
 ```sh
 uv run runner.py (or python runner.py)
 ```
-*Note: docker file is not yet created, if you want to run it manually via the uvicorn, you should use the following command:*
+
 
 ```sh
 uv run uvicorn backend.kanban.main:create_app --host 0.0.0.0 --port <desired port> --factory --loop "uvloop"  
@@ -122,6 +122,26 @@ uv run uvicorn backend.kanban.main:create_app --host 0.0.0.0 --port <desired por
 If you want app to reload on save (If you made some changes yourself) add --reload flag.
 Also, you can add workers via adding --workers=<amount of workers> flag.
 
+#### If you want to run it with docker, add the .env_db file with the next parameters: 
+
+```
+DB_USER=<your db user>
+DB_PASSWORD=<your db password>
+DB_NAME=kanban
+```
+
+Also make sure that your database host and database name are the same that were specified in docker-compose, like:
+```
+POSTGRES__HOST=database # < name of the service that was specified in the docker-compose file
+POSTGRES__DB=kanban # or name that you've specified in the .env_db
+```
+
+Rest part of the .env may still remain the same
+
+To run the app for the first time write:
+```
+docker compose --env-file .env_db --env-file .env up --build
+```
 
 ### Testing
 
