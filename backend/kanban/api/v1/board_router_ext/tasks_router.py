@@ -56,24 +56,6 @@ def create_tasks_router() -> APIRouter:
         )
 
     @tasks_router.get(
-        "/{task_id}",
-        dependencies=[
-            PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
-        ],
-        status_code=200,
-        description="Get full info about the single task",
-    )
-    async def get_single_task(
-        board_id: int,
-        column_id: int,
-        task_id: int,
-        task_svc: TaskSvcDep,
-    ) -> TaskView:
-        return await task_svc.get_task(
-            board_id=board_id, column_id=column_id, task_id=task_id
-        )
-
-    @tasks_router.get(
         "/events/stream",
         dependencies=[
             PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
@@ -101,6 +83,24 @@ def create_tasks_router() -> APIRouter:
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
             },
+        )
+
+    @tasks_router.get(
+        "/{task_id}",
+        dependencies=[
+            PermissionDep([RoleEnum.ADMIN, RoleEnum.MEMBER, RoleEnum.VIEWER])
+        ],
+        status_code=200,
+        description="Get full info about the single task",
+    )
+    async def get_single_task(
+        board_id: int,
+        column_id: int,
+        task_id: int,
+        task_svc: TaskSvcDep,
+    ) -> TaskView:
+        return await task_svc.get_task(
+            board_id=board_id, column_id=column_id, task_id=task_id
         )
 
     @tasks_router.put(
