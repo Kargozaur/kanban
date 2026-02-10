@@ -72,3 +72,9 @@ class UpdateTask(UpdateTaskBase):
             description="assign task to the user represented in the board or skip",
         ),
     ]
+
+
+class MoveTask(BaseModel):
+    target_column_id: int
+    above_task_id: int | None = None
+    below_task_id: int | None = None

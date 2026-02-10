@@ -28,6 +28,23 @@ class TasksRepo(BaseRepository[Tasks, CreateTask, UpdateTask]):
             query = query.filter_by(id=task_id)
         return query
 
+    async def _get_task_by_id(self, task_id: int) -> Tasks | None:
+        query = select(Tasks).where(Tasks.id == task_id)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    async def _get_position(self, column_id: int) -> Decimal:
+        query = select(func.max(Tasks.position)).filter_by(column_id=column_id)
+        current_max = await self.session.scalar(query) or Decimal("1.0")
+        return current_max
+
+    async def _position_map(self, task_ids: list[int]) -> dict[int, Decimal]:
+        if not task_ids:
+            return {}
+        query = select(Tasks.id, Tasks.position).where(Tasks.id.in_(task_ids))
+        result = await self.session.execute(query)
+        return {row.id: row.position for row in result.all()}
+
     async def create_task(
         self,
         board_id: int,
@@ -45,8 +62,7 @@ class TasksRepo(BaseRepository[Tasks, CreateTask, UpdateTask]):
             Tasks | None
         """
         if new_task.position is None:
-            query = select(func.max(Tasks.position)).filter_by(column_id=column_id)
-            current_max = await self.session.scalar(query) or Decimal("1.0")
+            current_max = await self._get_position(column_id)
             new_task.position = current_max
         result: Tasks = await super().create(
             new_task,
