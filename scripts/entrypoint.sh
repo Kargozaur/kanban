@@ -2,7 +2,6 @@
 set -e
 cd /app
 
-# Функция для ожидания базы
 wait_for_db() {
   echo "Waiting for database to be ready"
   python << END

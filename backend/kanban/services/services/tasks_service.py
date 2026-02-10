@@ -150,7 +150,6 @@ class TasksService:
         return TaskView.model_validate(task)
 
     async def _calculate_new_position(self, move_data: MoveTask) -> Decimal:
-
         neighbor_ids = [
             id
             for id in [move_data.above_task_id, move_data.below_task_id]

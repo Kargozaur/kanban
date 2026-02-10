@@ -45,7 +45,6 @@ class BaseRepository[
         return existing_field
 
     async def delete(self, **filters: object) -> None | bool:
-
         if not (existing_field := await self.get_entity(**filters)):
             return None
         await self.session.delete(existing_field)
