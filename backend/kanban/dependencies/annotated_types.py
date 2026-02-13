@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from typing_extensions import Doc
 
@@ -48,7 +48,7 @@ SettingsDep = Annotated[
 ]
 PaginationDep = Annotated[
     Pagination,
-    Depends(),
+    Query(),
     Doc(
         "dependency of the Pagination. Sets limit and offset for both the request"
         "and SQL queries"
