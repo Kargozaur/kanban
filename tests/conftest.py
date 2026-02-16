@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.kanban.core.security.password_hasher import get_hasher
 from backend.kanban.core.security.token_svc import get_token_svc
 from backend.kanban.core.settings.settings import get_settings
 from backend.kanban.database.session_provider import get_db
@@ -15,6 +14,16 @@ from backend.kanban.database.uow_provider import get_uow
 from backend.kanban.main import create_app
 from backend.kanban.models.models import Base
 from tests.db import AsyncSessionTest, test_engine
+
+
+class FakeHasher:
+    @staticmethod
+    def hash_password(password: str) -> str:
+        return f"hashed_{password}"
+
+    @staticmethod
+    def verify_password(password: str, db_password: str) -> bool:
+        return db_password == f"hashed_{password}"
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -40,7 +49,7 @@ def app_factory(session: AsyncSession) -> Callable[[], FastAPI]:
     def create_conf_app() -> FastAPI:
         app = create_app()
         settings = get_settings()
-        hasher = get_hasher()
+        hasher = FakeHasher()
         app.state.settings = settings
         app.state.hasher = hasher
         app.state.token = get_token_svc(settings)

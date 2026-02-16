@@ -128,9 +128,12 @@ class TasksService:
         if not task or target_col:
             raise ERROR_MAP[TaskErrorKeys.NOT_FOUND]()
         if task.column_id != move_data.target_column_id:
+            if not hasattr(target_col, "wip_limit") or not hasattr(target_col, "task"):
+                raise
             if (
-                target_col.wip_limit is not None  # ty:ignore[possibly-missing-attribute]
-                and len(target_col.task) >= task.wip_limit  # ty:ignore[possibly-missing-attribute]
+                target_col.wip_limit is not None
+                and len(target_col.task)  # ty:ignore[invalid-argument-type]
+                >= task.wip_limit  # invalid-argument-type]  # ty:ignore[unresolved-attribute]  # noqa: E501
             ):
                 raise ERROR_MAP[TaskErrorKeys.CONFLICT]()
         new_position = await self._calculate_new_position(move_data)
