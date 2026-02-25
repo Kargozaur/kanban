@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class BaseRepository[
     ModelT,
     CreateSchemaT: BaseModel,
-    UpdateSchemaT: BaseModel = None,
+    UpdateSchemaT: BaseModel | None = None,
 ]:
     def __init__(self, session: AsyncSession, model: type[ModelT]) -> None:
         self.session = session
@@ -19,7 +19,7 @@ class BaseRepository[
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def create(self, data: CreateSchemaT, **extra_fields: object) -> ModelT:
+    async def create(self, data: BaseModel, **extra_fields: object) -> ModelT:
         payload: dict[str, Any] = data.model_dump()
         payload.update(extra_fields)
         db_obj: ModelT = self.model(**payload)
@@ -29,7 +29,7 @@ class BaseRepository[
 
     async def update(
         self,
-        data_to_update: UpdateSchemaT,
+        data_to_update: BaseModel,
         **filters: object,
     ) -> None | ModelT:
         existing_field = await self.get_entity(**filters)

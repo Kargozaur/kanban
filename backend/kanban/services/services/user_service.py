@@ -2,6 +2,7 @@ from typing import Any
 
 from anyio.to_thread import run_sync
 
+from backend.kanban.core.decorators.read_only import read_only
 from backend.kanban.core.decorators.transactional import transactional
 from backend.kanban.core.exception_mappers.user_mapper import ERROR_MAP
 from backend.kanban.core.security.password_hasher import PasswordHasher
@@ -45,7 +46,7 @@ class UserService:
 
         return result
 
-    @transactional
+    @read_only
     async def login_user(self, user_credential: UserLogin) -> TokenResponse:
         if not (
             check_if_exists := await self.uow.users.get_user_data(user_credential.email)

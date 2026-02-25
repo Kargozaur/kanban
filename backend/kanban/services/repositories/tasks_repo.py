@@ -62,8 +62,8 @@ class TasksRepo(BaseRepository[Tasks, CreateTask, UpdateTask]):
             Tasks | None
         """
         if new_task.position is None:
-            current_max = await self._get_position(column_id)
-            new_task.position = current_max
+            current_max: Decimal = await self._get_position(column_id)
+            new_task.position: Decimal = current_max
         result: Tasks = await super().create(
             new_task,
             board_id=board_id,

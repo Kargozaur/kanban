@@ -50,8 +50,6 @@ class UserRepository(BaseRepository[User, UserCredentials]):
         return from_orm_user
 
     async def get_user_data(self, email: str) -> User | None:
-        query = self._get_user_by_email_helper(email)
-        result = await self.session.execute(query)
-        if not (row := result.scalar_one_or_none()):
+        if not (result := await super().get_entity(email=email)):
             return None
-        return row
+        return result
